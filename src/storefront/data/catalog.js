@@ -227,7 +227,7 @@ export const cartRecommendedIds = [
   'kundan-bridal-set-mathapatti'
 ];
 
-export const wishlistDefaultIds = ['diamond-drop-earrings', 'classic-gold-choker', 'antique-temple-bangles'];
+export const wishlistDefaultIds = [];
 
 export const wishlistRecommendedIds = [
   'pearl-statement-ring',
