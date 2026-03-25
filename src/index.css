@@ -1,0 +1,7 @@
+@import './styles/storefront.css';
+@import './styles/wishlist.css';
+@import './styles/admin.css';
+
+body {
+  margin: 0;
+}
