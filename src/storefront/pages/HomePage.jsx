@@ -114,7 +114,7 @@ const HomePage = () => {
 
             <div className="image-wrapper top-left-img">
               <img
-                src="/assets/vyram-cover.jpg"
+                src="/assets/cat-necklaces.png"
                 alt="Necklace Close up"
                 style={{ objectPosition: 'top center' }}
               />
@@ -122,7 +122,7 @@ const HomePage = () => {
 
             <div className="image-wrapper bottom-right-img">
               <img
-                src="/assets/vyram-cover.jpg"
+                src="/assets/cat-earrings.png"
                 alt="Earring Close up"
                 style={{ objectPosition: 'bottom right' }}
               />
@@ -143,7 +143,7 @@ const HomePage = () => {
           {homeCollectionItems.map((item) => (
             <div key={item} className="collection-item reveal-on-scroll">
               <div className="circle-outline">
-                <img src="/assets/vyram-cover.jpg" alt={item} />
+                <img src={`/assets/cat-${item.toLowerCase().replace(' ', '-')}.png`} alt={item} onError={(e) => { e.target.src = '/assets/product-default.png'; }} />
               </div>
               <h3>{item.toUpperCase()}</h3>
             </div>
@@ -209,7 +209,7 @@ const HomePage = () => {
             >
               <div className="arch-outline">
                 <div className="arch-img">
-                  <img src="/assets/vyram-cover.jpg" alt={collection.title} />
+                  <img src="/assets/bridal-default.png" alt={collection.title} />
                   <div className="overlay-text">{collection.title.toUpperCase()}</div>
                 </div>
               </div>

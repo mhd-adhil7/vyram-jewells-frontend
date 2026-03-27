@@ -1,6 +1,17 @@
-export const defaultProductImage = '/assets/vyram-cover.jpg';
+export const defaultProductImage = '/assets/product-default.png';
 
-export const products = [
+export const getProductImage = (category) => {
+  switch (category) {
+    case 'necklaces': return '/assets/cat-necklaces.png';
+    case 'earrings': return '/assets/cat-earrings.png';
+    case 'bangles': return '/assets/cat-bangles.png';
+    case 'temple': return '/assets/cat-temple.png';
+    case 'bridal': return '/assets/bridal-default.png';
+    default: return defaultProductImage;
+  }
+};
+
+const rawProducts = [
   { id: 'kundan-choker', name: 'Kundan Choker', price: 1250, category: 'necklaces', image: defaultProductImage },
   { id: 'temple-work-drops', name: 'Temple Work Drops', price: 450, category: 'earrings', image: defaultProductImage },
   {
@@ -155,6 +166,11 @@ export const products = [
   }
 ];
 
+export const products = rawProducts.map(p => ({
+  ...p,
+  image: p.image === '/assets/vyram-cover.jpg' ? getProductImage(p.category) : getProductImage(p.category)
+}));
+
 export const productsById = Object.fromEntries(products.map((product) => [product.id, product]));
 
 export const categoryLabels = {
@@ -169,7 +185,7 @@ export const categoryLabels = {
 
 export const collectionFilters = Object.keys(categoryLabels);
 
-export const homeCollectionItems = ['Playfair Display', 'Necklaces', 'Bangles', 'Temple', 'Earrings'];
+export const homeCollectionItems = ['Rings', 'Necklaces', 'Bangles', 'Temple', 'Earrings'];
 
 export const homeNewArrivalIds = ['kundan-choker', 'temple-work-drops', 'classic-gold-bangles', 'polki-necklace-set'];
 

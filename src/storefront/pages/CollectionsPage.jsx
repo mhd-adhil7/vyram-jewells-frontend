@@ -68,7 +68,7 @@ const CollectionsPage = () => {
           </div>
         </div>
         <div className="collections-hero-image">
-          <img src="/assets/vyram-cover.jpg" alt="Collections" />
+          <img src="/assets/cat-necklaces.png" alt="Collections" />
         </div>
       </section>
 
@@ -161,7 +161,7 @@ const CollectionsPage = () => {
             >
               <div className="arch-outline">
                 <div className="arch-img">
-                  <img src="/assets/vyram-cover.jpg" alt={collection.title} />
+                  <img src="/assets/bridal-default.png" alt={collection.title} />
                   <div className="overlay-text">{collection.title.toUpperCase()}</div>
                 </div>
               </div>

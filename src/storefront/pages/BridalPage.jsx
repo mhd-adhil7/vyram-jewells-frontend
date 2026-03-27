@@ -34,7 +34,7 @@ const BridalPage = () => {
           </div>
         </div>
         <div className="bridal-page-hero-image">
-          <img src="/assets/vyram-cover.jpg" alt="Bridal Jewellery" />
+          <img src="/assets/bridal-default.png" alt="Bridal Jewellery" />
         </div>
       </section>
 
@@ -47,7 +47,7 @@ const BridalPage = () => {
               style={{ transitionDelay: `${(index + 1) * 0.1}s` }}
             >
               <div className="circle-outline">
-                <img src="/assets/vyram-cover.jpg" alt={category} />
+                <img src="/assets/bridal-default.png" alt={category} />
               </div>
               <h3>{category.toUpperCase()}</h3>
             </div>
@@ -73,7 +73,7 @@ const BridalPage = () => {
             >
               <div className="arch-outline">
                 <div className="arch-img">
-                  <img src="/assets/vyram-cover.jpg" alt={collection.title} />
+                  <img src="/assets/bridal-default.png" alt={collection.title} />
                   <div className="overlay-text">{collection.title.toUpperCase()}</div>
                 </div>
               </div>

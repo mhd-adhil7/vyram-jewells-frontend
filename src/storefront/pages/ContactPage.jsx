@@ -67,7 +67,7 @@ const ContactPage = () => {
       <section className="contact-split-new fade-in-on-scroll">
         <div className="contact-split-container">
           <div className="contact-image-side">
-            <img src="/assets/vyram-cover.jpg" alt="Vyram Jewelry Aesthetic" />
+            <img src="/assets/cat-bangles.png" alt="Vyram Jewelry Aesthetic" />
           </div>
 
           <div className="contact-form-side-new">

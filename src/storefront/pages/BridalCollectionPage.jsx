@@ -23,7 +23,7 @@ const BridalCollectionPage = () => {
           <p>{collection.description}</p>
         </div>
         <div className="bridal-page-hero-image">
-          <img src="/assets/vyram-cover.jpg" alt={collection.title} />
+          <img src="/assets/bridal-default.png" alt={collection.title} />
         </div>
       </section>
 

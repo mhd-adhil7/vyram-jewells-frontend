@@ -317,7 +317,7 @@ const AdminProductsPage = () => {
                     type="text"
                     value={formState.image}
                     onChange={(event) => setFormState((prev) => ({ ...prev, image: event.target.value }))}
-                    placeholder="/assets/vyram-cover.jpg"
+                    placeholder="/assets/product-default.png"
                   />
                 </label>
               </div>

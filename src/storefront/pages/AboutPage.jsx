@@ -3,7 +3,7 @@ const AboutPage = () => {
     <>
       <section className="about-hero">
         <div className="about-hero-bg">
-          <img src="/assets/vyram-cover.jpg" alt="Elegance" />
+          <img src="/assets/cat-necklaces.png" alt="Elegance" />
           <div className="about-hero-overlay"></div>
         </div>
         <div className="about-hero-content">
@@ -18,7 +18,7 @@ const AboutPage = () => {
       <section className="brand-story">
         <div className="story-container reveal-on-scroll">
           <div className="story-image">
-            <img src="/assets/vyram-cover.jpg" alt="Jewellery Craftsmanship" />
+            <img src="/assets/cat-earrings.png" alt="Jewellery Craftsmanship" />
           </div>
           <div className="story-content">
             <h2>Crafted with Passion</h2>
