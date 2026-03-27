@@ -1,6 +1,7 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import QuickViewModal from '../components/QuickViewModal';
 import { bridalCollections, homeCollectionItems, homeNewArrivalIds } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 
@@ -8,6 +9,18 @@ const HomePage = () => {
   const { products } = useProductCatalog();
   const newArrivals = products.slice(0, 10); // Show more items for carousel
   const carouselRef = useRef(null);
+
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const openQuickView = (product) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
+
+  const closeQuickView = () => {
+    setIsQuickViewOpen(false);
+  };
 
   const scrollLeft = () => {
     if (carouselRef.current) {
@@ -166,6 +179,7 @@ const HomePage = () => {
                   product={product}
                   className="new-arrival-item"
                   showQuickView
+                  onQuickView={openQuickView}
                 />
               ))}
             </div>
@@ -203,6 +217,12 @@ const HomePage = () => {
           ))}
         </div>
       </section>
+
+      <QuickViewModal
+        product={quickViewProduct}
+        isOpen={isQuickViewOpen}
+        onClose={closeQuickView}
+      />
     </>
   );
 };

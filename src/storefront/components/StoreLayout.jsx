@@ -133,7 +133,7 @@ const StoreLayout = () => {
         </div>
       </header>
 
-      <nav className={`secondary-nav-container ${mobileMenuOpen ? 'active' : ''}`}>
+      <nav className="secondary-nav-container desktop-only">
         <ul className="secondary-nav">
           {secondaryNavItems.map((item) => (
             <li key={item.to}>
@@ -143,7 +143,6 @@ const StoreLayout = () => {
                 className={({ isActive }) =>
                   isActive ? 'active page-transition-link' : 'page-transition-link'
                 }
-                onClick={() => setMobileMenuOpen(false)}
               >
                 {item.label}
               </NavLink>
@@ -152,28 +151,73 @@ const StoreLayout = () => {
         </ul>
       </nav>
 
-      {/* Mobile Menu Overlay */}
+      {/* Main Page Blur Overlay */}
       <div 
         className={`mobile-menu-overlay ${mobileMenuOpen ? 'active' : ''}`} 
         onClick={() => setMobileMenuOpen(false)}
         aria-hidden="true"
       ></div>
 
+      {/* Premium Mobile Menu Container */}
+      <div className={`premium-mobile-menu ${mobileMenuOpen ? 'active' : ''}`}>
+        <div className="mobile-menu-topbar">
+          <button 
+            type="button" 
+            className="mobile-close-btn" 
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Close Menu"
+          >
+            <i className="fa-solid fa-xmark"></i>
+          </button>
+          
+          <div className="mobile-menu-logo">
+            <Link to="/" onClick={() => setMobileMenuOpen(false)}>
+              <img src="/assets/vyram-logo.png" alt="Vyram Jewells" />
+            </Link>
+          </div>
+          
+          <div className="mobile-menu-right">
+            {/* Empty space for balance */}
+          </div>
+        </div>
+        
+        <nav className="mobile-nav-content">
+          <ul className="mobile-nav-list">
+            {secondaryNavItems.map((item) => (
+              <li key={item.to}>
+                <NavLink
+                  to={item.to}
+                  end={item.end}
+                  className={({ isActive }) => isActive ? 'active' : ''}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+
       <Outlet />
 
       <Footer />
 
       <div className="sticky-socials">
-        <a href="#" className="social-icon" aria-label="Instagram">
+        <Link to="/cart" className="social-icon cart-social-icon" aria-label="Cart">
+          <i className="fa-solid fa-cart-shopping"></i>
+          <span className="cart-count">{cartCount}</span>
+        </Link>
+        <a href="https://www.instagram.com" target="_blank" rel="noreferrer" className="social-icon" aria-label="Instagram">
           <i className="fa-brands fa-instagram"></i>
         </a>
-        <a href="#" className="social-icon" aria-label="WhatsApp">
+        <a href="https://wa.me" target="_blank" rel="noreferrer" className="social-icon" aria-label="WhatsApp">
           <i className="fa-brands fa-whatsapp"></i>
         </a>
-        <a href="#" className="social-icon" aria-label="Facebook">
+        <a href="https://www.facebook.com" target="_blank" rel="noreferrer" className="social-icon" aria-label="Facebook">
           <i className="fa-brands fa-facebook"></i>
         </a>
-        <a href="#" className="social-icon" aria-label="Phone">
+        <a href="tel:+1234567890" className="social-icon" aria-label="Phone">
           <i className="fa-solid fa-phone"></i>
         </a>
       </div>

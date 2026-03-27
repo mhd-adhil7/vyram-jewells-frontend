@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import QuickViewModal from '../components/QuickViewModal';
 import {
   bridalCollections,
   categoryLabels,
@@ -12,6 +13,18 @@ const CollectionsPage = () => {
   const { products } = useProductCatalog();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeFilter, setActiveFilter] = useState('all');
+
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const openQuickView = (product) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
+
+  const closeQuickView = () => {
+    setIsQuickViewOpen(false);
+  };
 
   const searchTerm = (searchParams.get('q') || '').trim().toLowerCase();
 
@@ -100,6 +113,7 @@ const CollectionsPage = () => {
               key={product.id}
               product={product}
               showQuickView
+              onQuickView={openQuickView}
               className="reveal-on-scroll"
               style={{ transitionDelay: `${(index % 4) * 0.1 + 0.1}s` }}
             />
@@ -155,6 +169,12 @@ const CollectionsPage = () => {
           ))}
         </div>
       </section>
+
+      <QuickViewModal
+        product={quickViewProduct}
+        isOpen={isQuickViewOpen}
+        onClose={closeQuickView}
+      />
     </>
   );
 };
