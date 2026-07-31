@@ -2671,6 +2671,13 @@ body.page-transitioning {
     color: #C5A059; /* Gold color for price */
 }
 
+.cart-item-subtotal {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--color-text-sub);
+    margin-top: 4px;
+}
+
 .cart-item-actions {
     display: flex;
     align-items: center;

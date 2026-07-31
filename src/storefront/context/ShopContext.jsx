@@ -5,7 +5,7 @@ import { useProductCatalog } from './ProductCatalogContext';
 const CART_STORAGE_KEY = 'vyram_cart';
 const WISHLIST_STORAGE_KEY = 'vyram_wishlist';
 
-const normalizeQty = (value) => {
+const normalizeQuantity = (value) => {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0) {
     return 1;
@@ -22,22 +22,29 @@ const normalizeCart = (rawCart, productsById, nameToId) => {
   const merged = new Map();
 
   rawCart.forEach((entry) => {
-    let id = entry?.id;
+    let id = undefined;
+    let quantity = 1;
 
-    if (!id && typeof entry?.name === 'string') {
-      id = nameToId.get(entry.name.toLowerCase());
+    if (typeof entry === 'string') {
+      id = entry;
+    } else if (entry && typeof entry === 'object') {
+      id = entry.id;
+      if (!id && typeof entry.name === 'string') {
+        id = nameToId.get(entry.name.toLowerCase());
+      }
+      quantity = entry.quantity ?? entry.qty ?? 1;
     }
 
     if (!id || !productsById[id]) {
       return;
     }
 
-    const qty = normalizeQty(entry?.qty ?? 1);
+    const nextQuantity = normalizeQuantity(quantity);
     const existingQty = merged.get(id) ?? 0;
-    merged.set(id, existingQty + qty);
+    merged.set(id, existingQty + nextQuantity);
   });
 
-  return Array.from(merged.entries()).map(([id, qty]) => ({ id, qty }));
+  return Array.from(merged.entries()).map(([id, quantity]) => ({ id, quantity }));
 };
 
 const normalizeWishlist = (
@@ -147,21 +154,21 @@ export const ShopProvider = ({ children }) => {
   );
 
   const cartCount = useMemo(
-    () => cartItems.reduce((total, item) => total + item.qty, 0),
-    [cartItems]
+    () => cart.length,
+    [cart]
   );
 
   const cartSubtotal = useMemo(
-    () => cartItems.reduce((total, item) => total + item.product.price * item.qty, 0),
+    () => cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0),
     [cartItems]
   );
 
-  const addToCart = (productId, qty = 1) => {
+  const addToCart = (productId, quantity = 1) => {
     if (!productsById[productId]) {
       return;
     }
 
-    const nextQty = normalizeQty(qty);
+    const nextQuantity = normalizeQuantity(quantity);
 
     setCart((prevCart) => {
       const existing = prevCart.find((entry) => entry.id === productId);
@@ -171,23 +178,23 @@ export const ShopProvider = ({ children }) => {
           entry.id === productId
             ? {
                 ...entry,
-                qty: entry.qty + nextQty
+                quantity: entry.quantity + nextQuantity
               }
             : entry
         );
       }
 
-      return [...prevCart, { id: productId, qty: nextQty }];
+      return [...prevCart, { id: productId, quantity: nextQuantity }];
     });
   };
 
-  const setCartQuantity = (productId, qty) => {
+  const setCartQuantity = (productId, quantity) => {
     if (!productsById[productId]) {
       return;
     }
 
-    const nextQty = Number(qty);
-    if (!Number.isFinite(nextQty) || nextQty <= 0) {
+    const nextQuantity = Number(quantity);
+    if (!Number.isFinite(nextQuantity) || nextQuantity <= 0) {
       setCart((prevCart) => prevCart.filter((entry) => entry.id !== productId));
       return;
     }
@@ -197,7 +204,7 @@ export const ShopProvider = ({ children }) => {
         entry.id === productId
           ? {
               ...entry,
-              qty: Math.floor(nextQty)
+              quantity: Math.floor(nextQuantity)
             }
           : entry
       )

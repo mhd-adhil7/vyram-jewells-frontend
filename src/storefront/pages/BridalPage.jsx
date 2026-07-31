@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import QuickViewModal from '../components/QuickViewModal';
 import { bridalCollections, bridalFavoriteIds } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 
@@ -14,6 +16,18 @@ const bridalCategories = [
 const BridalPage = () => {
   const { productsById } = useProductCatalog();
   const favoriteProducts = bridalFavoriteIds.map((id) => productsById[id]).filter(Boolean);
+
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const openQuickView = (product) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
+
+  const closeQuickView = () => {
+    setIsQuickViewOpen(false);
+  };
 
   return (
     <>
@@ -95,12 +109,19 @@ const BridalPage = () => {
               key={product.id}
               product={product}
               showQuickView
+              onQuickView={openQuickView}
               className="reveal-on-scroll"
               style={{ transitionDelay: `${(index % 4) * 0.1 + 0.1}s` }}
             />
           ))}
         </div>
       </section>
+
+      <QuickViewModal
+        product={quickViewProduct}
+        isOpen={isQuickViewOpen}
+        onClose={closeQuickView}
+      />
     </>
   );
 };

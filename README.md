@@ -1,24 +1,15 @@
 # Vyram Jewells React App
 
-Single Vite + React project containing:
+Vite + React storefront project containing:
 
 - Customer storefront (`/`)
-- Admin dashboard (`/admin/*`)
 
 ## Features
 
 - Storefront pages: Home, About, Collections, Bridal, Contact, Cart, Wishlist
-- Admin pages: Dashboard, Products, Orders, Customers, Messages, Analytics, Settings
-- Admin authentication with protected routes and persisted login state (`localStorage`)
-- Admin product CRUD (Create, Read, Update, Delete) with validation
-- Shared product catalog state across Admin + Storefront (admin changes reflect immediately on storefront pages)
+- Product catalog state with local persistence (`localStorage`)
 - Cart/wishlist resilience when products are removed (invalid product refs are filtered out)
-- Shared React Router setup in one app
-
-## Admin Login (Demo)
-
-- Email: `admin@vyramjewells.com`
-- Password: `admin123`
+- React Router setup for storefront pages
 
 ## Routes
 
@@ -31,15 +22,6 @@ Single Vite + React project containing:
   - `/contact`
   - `/cart`
   - `/wishlist`
-- Admin:
-  - `/admin/login`
-  - `/admin`
-  - `/admin/products`
-  - `/admin/orders`
-  - `/admin/customers`
-  - `/admin/messages`
-  - `/admin/analytics`
-  - `/admin/settings`
 
 ## Scripts
 
@@ -53,8 +35,7 @@ Single Vite + React project containing:
 
 The app uses browser `localStorage` for demo persistence:
 
-- `vyram_admin_auth` - admin auth session
-- `vyram_products` - product catalog used by admin + storefront
+- `vyram_products` - product catalog used by storefront
 - `vyram_cart` - cart items
 - `vyram_wishlist` - wishlist items
 
@@ -67,3 +48,4 @@ To reset demo data, clear these keys in browser devtools (Application/Storage ta
 - Vite
 - React Context for shared catalog and shop state
 - Global stylesheet imports (`src/styles/*.css`)
+

@@ -2,9 +2,9 @@ import { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
-import { bridalCollections, homeCollectionItems, homeNewArrivalIds } from '../data/catalog';
+import { bridalCollections, homeCollectionItems } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
-
+import image from '../../assets/vyramheroimgae.jpeg';
 const HomePage = () => {
   const { products } = useProductCatalog();
   const newArrivals = products.slice(0, 10); // Show more items for carousel
@@ -41,20 +41,20 @@ const HomePage = () => {
     if (!carousel) return;
 
     let intervalId;
-    
+
     const startAutoScroll = () => {
       intervalId = setInterval(() => {
         if (carousel && carousel.firstElementChild) {
           const cardWidth = carousel.firstElementChild.offsetWidth;
           const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
-          
+
           if (carousel.scrollLeft >= maxScrollLeft - 10) {
             carousel.scrollTo({ left: 0, behavior: 'smooth' });
           } else {
             carousel.scrollBy({ left: cardWidth + 30, behavior: 'smooth' });
           }
         }
-      }, 4000); 
+      }, 4000);
     };
 
     startAutoScroll();
@@ -109,7 +109,7 @@ const HomePage = () => {
             </div>
 
             <div className="image-wrapper main-img">
-              <img src="/assets/vyram-cover.jpg" alt="Bridal Saree Jewellery" />
+              <img src={image} alt="" />
             </div>
 
             <div className="image-wrapper top-left-img">

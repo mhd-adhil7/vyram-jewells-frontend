@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import QuickViewModal from '../components/QuickViewModal';
 import { bridalCollections } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 
@@ -7,6 +9,20 @@ const BridalCollectionPage = () => {
   const { productsById } = useProductCatalog();
   const { collectionSlug } = useParams();
   const collection = bridalCollections.find((item) => item.slug === collectionSlug);
+
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const openQuickView = (product) => {
+    console.log('DEBUG: openQuickView called for product:', product);
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
+
+  const closeQuickView = () => {
+    console.log('DEBUG: closeQuickView called');
+    setIsQuickViewOpen(false);
+  };
 
   if (!collection) {
     return <Navigate to="/bridal" replace />;
@@ -41,12 +57,19 @@ const BridalCollectionPage = () => {
               key={product.id}
               product={product}
               showQuickView
+              onQuickView={openQuickView}
               className="reveal-on-scroll"
               style={{ transitionDelay: `${(index + 1) * 0.1}s` }}
             />
           ))}
         </div>
       </section>
+
+      <QuickViewModal
+        product={quickViewProduct}
+        isOpen={isQuickViewOpen}
+        onClose={closeQuickView}
+      />
     </>
   );
 };

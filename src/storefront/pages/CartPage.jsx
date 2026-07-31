@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import QuickViewModal from '../components/QuickViewModal';
 import { cartRecommendedIds, formatPrice } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 import { useShop } from '../context/ShopContext';
@@ -8,19 +10,31 @@ const WHATSAPP_NUMBER = '9744342857';
 
 const CartPage = () => {
   const { productsById } = useProductCatalog();
-  const { cartItems, cartSubtotal, removeFromCart, setCartQuantity } = useShop();
+  const { cartCount, cartItems, cartSubtotal, removeFromCart, setCartQuantity } = useShop();
 
   const recommendedProducts = cartRecommendedIds.map((id) => productsById[id]).filter(Boolean);
 
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const openQuickView = (product) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
+
+  const closeQuickView = () => {
+    setIsQuickViewOpen(false);
+  };
+
   const handleCheckout = () => {
-    if (cartItems.length === 0) {
+    if (cartCount === 0) {
       window.alert('Your cart is empty. Please add items before checking out.');
       return;
     }
 
     const itemLines = cartItems
       .map((item) => {
-        return `Product: ${item.product.name}\nQuantity: ${item.qty}\nPrice: ${formatPrice(
+        return `Product: ${item.product.name}\nQuantity: ${item.quantity}\nPrice: ${formatPrice(
           item.product.price
         )}`;
       })
@@ -48,7 +62,7 @@ const CartPage = () => {
 
       <div className="cart-content-wrapper">
         <div className="cart-items-container">
-          {cartItems.length === 0 ? (
+          {cartCount === 0 ? (
             <p
               className="empty-cart-msg"
               style={{
@@ -83,21 +97,24 @@ const CartPage = () => {
                   <p className="cart-item-price" data-price={item.product.price}>
                     {formatPrice(item.product.price)}
                   </p>
+                  <p className="cart-item-subtotal">
+                    Subtotal: {formatPrice(item.product.price * item.quantity)}
+                  </p>
                 </div>
                 <div className="cart-item-actions">
                   <div className="quantity-selector">
                     <button
                       type="button"
                       className="qty-btn qty-minus"
-                      onClick={() => setCartQuantity(item.id, item.qty - 1)}
+                      onClick={() => setCartQuantity(item.id, item.quantity - 1)}
                     >
                       -
                     </button>
-                    <input type="text" className="qty-input" value={item.qty} readOnly />
+                    <input type="text" className="qty-input" value={item.quantity} readOnly />
                     <button
                       type="button"
                       className="qty-btn qty-plus"
-                      onClick={() => setCartQuantity(item.id, item.qty + 1)}
+                      onClick={() => setCartQuantity(item.id, item.quantity + 1)}
                     >
                       +
                     </button>
@@ -129,7 +146,7 @@ const CartPage = () => {
             </div>
             <div className="summary-row">
               <span>Discount</span>
-              <span>-$0</span>
+              <span>-₹0</span>
             </div>
             <div className="summary-row total">
               <span>Total Price</span>
@@ -153,10 +170,21 @@ const CartPage = () => {
         </div>
         <div className="product-grid">
           {recommendedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} showQuickView />
+            <ProductCard
+              key={product.id}
+              product={product}
+              showQuickView
+              onQuickView={openQuickView}
+            />
           ))}
         </div>
       </div>
+
+      <QuickViewModal
+        product={quickViewProduct}
+        isOpen={isQuickViewOpen}
+        onClose={closeQuickView}
+      />
     </main>
   );
 };

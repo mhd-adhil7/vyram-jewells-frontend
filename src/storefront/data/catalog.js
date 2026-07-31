@@ -185,7 +185,20 @@ export const categoryLabels = {
 
 export const collectionFilters = Object.keys(categoryLabels);
 
-export const homeCollectionItems = ['Rings', 'Necklaces', 'Bangles', 'Temple', 'Earrings'];
+export const homeCollectionItems = [
+  'Necklaces',
+  'Haram',
+  'Earrings',
+  'Ear Accessories',
+  'Tikkas',
+  'Nose Pins',
+  'Bangles',
+  'Hip Chains',
+  'Rings',
+  'Hair Accessories',
+  'Anklets',
+  'Bridal Sets'
+];
 
 export const homeNewArrivalIds = ['kundan-choker', 'temple-work-drops', 'classic-gold-bangles', 'polki-necklace-set'];
 
@@ -253,8 +266,8 @@ export const wishlistRecommendedIds = [
 ];
 
 export const formatPrice = (value) =>
-  new Intl.NumberFormat('en-US', {
+  new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'INR',
     maximumFractionDigits: 0
   }).format(value);
