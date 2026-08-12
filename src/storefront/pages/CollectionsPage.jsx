@@ -2,11 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
-import {
-  bridalCollections,
-  categoryLabels,
-  collectionFilters
-} from '../data/catalog';
+import { bridalCollections } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 
 const CollectionsPage = () => {
@@ -38,9 +34,28 @@ const CollectionsPage = () => {
     setSearchParams(nextParams);
   };
 
+  const categories = useMemo(() => {
+    const unique = [];
+    const seen = new Set();
+    products.forEach((product) => {
+      if (product.category) {
+        const cat = product.category.trim();
+        const lower = cat.toLowerCase();
+        if (!seen.has(lower)) {
+          seen.add(lower);
+          unique.push({
+            slug: product.categorySlug,
+            label: cat
+          });
+        }
+      }
+    });
+    return unique;
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      if (activeFilter !== 'all' && product.category !== activeFilter) {
+      if (activeFilter !== 'all' && product.categorySlug !== activeFilter) {
         return false;
       }
 
@@ -48,7 +63,15 @@ const CollectionsPage = () => {
         return true;
       }
 
-      return product.name.toLowerCase().includes(searchTerm);
+      const searchLower = searchTerm.toLowerCase().trim();
+      const nameMatch = product.name?.toLowerCase().includes(searchLower);
+      
+      const keywords = product.searchKeywords || '';
+      const keywordMatch = keywords
+        .split(',')
+        .some(kw => kw.trim().toLowerCase().includes(searchLower));
+
+      return nameMatch || keywordMatch;
     });
   }, [activeFilter, products, searchTerm]);
 
@@ -87,14 +110,21 @@ const CollectionsPage = () => {
         </div>
 
         <div className="category-filter reveal-on-scroll">
-          {collectionFilters.map((filterKey) => (
+          <button
+            type="button"
+            className={`filter-pill ${activeFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setActiveFilter('all')}
+          >
+            All
+          </button>
+          {categories.map((cat) => (
             <button
-              key={filterKey}
+              key={cat.slug}
               type="button"
-              className={`filter-pill ${activeFilter === filterKey ? 'active' : ''}`}
-              onClick={() => setActiveFilter(filterKey)}
+              className={`filter-pill ${activeFilter === cat.slug ? 'active' : ''}`}
+              onClick={() => setActiveFilter(cat.slug)}
             >
-              {categoryLabels[filterKey]}
+              {cat.label}
             </button>
           ))}
         </div>

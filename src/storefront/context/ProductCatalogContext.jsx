@@ -17,16 +17,16 @@ const normalizeId = (value) =>
 
 const normalizeName = (value) => String(value ?? '').trim();
 
-const normalizeCategory = (value) => {
-  const nextCategory = String(value ?? '')
+const slugifyCategory = (category) => {
+  return String(category ?? '')
     .trim()
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
+};
 
-  if (!nextCategory) {
-    return DEFAULT_CATEGORY;
-  }
-
-  return PRODUCT_CATEGORY_KEYS.includes(nextCategory) ? nextCategory : null;
+const normalizeCategory = (value) => {
+  return String(value ?? '').trim() || DEFAULT_CATEGORY;
 };
 
 const normalizePrice = (value) => {
@@ -82,6 +82,8 @@ const validateCreateInput = (raw) => {
     id,
     name,
     category,
+    categorySlug: slugifyCategory(category),
+    searchKeywords: raw?.searchKeywords || raw?.search_keywords || '',
     price,
     image: normalizeImage(raw?.image),
     stock
@@ -112,6 +114,8 @@ const validateUpdateInput = (raw) => {
   return {
     name,
     category,
+    categorySlug: slugifyCategory(category),
+    searchKeywords: raw?.searchKeywords || raw?.search_keywords || '',
     price,
     image: normalizeImage(raw?.image),
     stock
@@ -132,6 +136,8 @@ const normalizeStoredProduct = (raw) => {
     id,
     name,
     category,
+    categorySlug: raw?.categorySlug || slugifyCategory(category),
+    searchKeywords: raw?.searchKeywords || raw?.search_keywords || '',
     price,
     image: normalizeImage(raw?.image),
     stock: normalizeStock(raw?.stock)
@@ -151,13 +157,13 @@ const uniqueProducts = (products) => {
   });
 };
 
-const seedCatalogProducts = uniqueProducts(
+const _seedCatalogProducts = uniqueProducts(
   seedProducts
     .map((product) => normalizeStoredProduct({ ...product, stock: product.stock ?? DEFAULT_STOCK }))
     .filter(Boolean)
 );
 
-const readStoredProducts = () => {
+const _readStoredProducts = () => {
   if (typeof window === 'undefined') {
     return null;
   }
@@ -229,7 +235,7 @@ const parseCSV = (csvText) => {
   return lines;
 };
 
-const mapCategoryToInternal = (sheetCategory) => {
+const _mapCategoryToInternal = (sheetCategory) => {
   const normalized = String(sheetCategory ?? '')
     .trim()
     .toLowerCase();
@@ -295,11 +301,20 @@ const parseProductsFromCSV = (csvText) => {
 
   const headers = rows[headerIndex].map(h => h.trim().toLowerCase());
   const idIdx = headers.indexOf('id');
-  const priceIdx = headers.indexOf('price');
+  const nameIdx = headers.indexOf('name');
   const categoryIdx = headers.indexOf('category');
+  const keywordsIdx = headers.findIndex(h => h === 'search_keywords' || h === 'search keywords' || h === 'keywords');
+  const priceIdx = headers.indexOf('price');
   const imageIdx = headers.indexOf('image');
 
   const productsList = [];
+  const fallbackNames = {
+    '1': 'Palakka Necklace',
+    '2': 'Bridal Haram',
+    '3': 'Earrings',
+    '4': 'Bridal Sets'
+  };
+
   for (let i = headerIndex + 1; i < rows.length; i++) {
     const row = rows[i];
     if (row.length <= 1) continue;
@@ -315,19 +330,20 @@ const parseProductsFromCSV = (csvText) => {
       const categoryVal = row[categoryIdx]?.trim() || '';
       const imageVal = row[imageIdx]?.trim() || '';
 
-      const internalCategory = mapCategoryToInternal(categoryVal);
+      let nameVal = nameIdx !== -1 ? row[nameIdx]?.trim() : '';
+      if (!nameVal) {
+        nameVal = fallbackNames[idVal] || categoryVal || 'Jewellery';
+      }
 
-      const displayCategoryName = internalCategory === 'temple' ? 'Temple Jewellery' :
-                                  internalCategory === 'bridal' ? 'Bridal Set' :
-                                  internalCategory.charAt(0).toUpperCase() + internalCategory.slice(1).replace(/-+/g, ' ');
-      const singularName = displayCategoryName.endsWith('s') ? displayCategoryName.slice(0, -1) : displayCategoryName;
-      const nameVal = `${singularName} ${idVal}`;
+      const keywordsVal = keywordsIdx !== -1 ? row[keywordsIdx]?.trim() : '';
 
       productsList.push({
         id: idVal,
         name: nameVal,
         price: priceVal,
-        category: internalCategory,
+        category: categoryVal,
+        categorySlug: slugifyCategory(categoryVal),
+        searchKeywords: keywordsVal,
         image: imageVal || '/assets/product-default.png',
         stock: 10
       });

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
-import { bridalCollections, bridalFavoriteIds } from '../data/catalog';
+import { bridalCollections } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 
 const bridalCategories = [
@@ -14,8 +14,15 @@ const bridalCategories = [
 ];
 
 const BridalPage = () => {
-  const { productsById } = useProductCatalog();
-  const favoriteProducts = bridalFavoriteIds.map((id) => productsById[id]).filter(Boolean);
+  const { products } = useProductCatalog();
+  const favoriteProducts = useMemo(() => {
+    const bridalList = products.filter(
+      (p) =>
+        p.category?.toLowerCase().includes('bridal') ||
+        p.categorySlug?.includes('bridal')
+    );
+    return bridalList.length > 0 ? bridalList.slice(0, 6) : products.slice(0, 6);
+  }, [products]);
 
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);

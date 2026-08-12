@@ -1,29 +1,27 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 
-const categoryMapping = {
-  'necklaces': { label: 'Necklaces', productCategory: 'necklaces', description: 'Explore our exquisite handcrafted necklaces designed for timeless beauty.' },
-  'haram': { label: 'Haram', productCategory: 'haram', description: 'Explore our traditional haram collections crafted with ultimate precision.' },
-  'earrings': { label: 'Earrings', productCategory: 'earrings', description: 'Discover beautiful gold, diamond, and kundan earrings.' },
-  'ear-accessories': { label: 'Ear Accessories', productCategory: 'ear-accessories', description: 'Enhance your look with elegant ear accessories.' },
-  'tikkas': { label: 'Tikkas', productCategory: 'tikkas', description: 'Complete your traditional attire with our gorgeous maang tikkas.' },
-  'nose-pins': { label: 'Nose Pins', productCategory: 'nose-pins', description: 'Sleek, beautiful, and delicate nose pins for every occasion.' },
-  'bangles': { label: 'Bangles', productCategory: 'bangles', description: 'Intricately designed bangles to grace your wrists.' },
-  'hip-chains': { label: 'Hip Chains', productCategory: 'hip-chains', description: 'Stunning hip chains to complete your bridal and ethnic look.' },
-  'rings': { label: 'Rings', productCategory: 'rings', description: 'Elegant rings celebrating timeless design and shine.' },
-  'hair-accessories': { label: 'Hair Accessories', productCategory: 'hair-accessories', description: 'Premium hair accessories for bridal and festive styles.' },
-  'anklets': { label: 'Anklets', productCategory: 'anklets', description: 'Traditional and modern anklets to beautify your steps.' },
-  'bridal-sets': { label: 'Bridal Sets', productCategory: 'bridal', description: 'Celebrate your special day with our featured bridal collections.' }
+const categoryDescriptions = {
+  'necklaces': 'Explore our exquisite handcrafted necklaces designed for timeless beauty.',
+  'haram': 'Explore our traditional haram collections crafted with ultimate precision.',
+  'earrings': 'Discover beautiful gold, diamond, and kundan earrings.',
+  'ear-accessories': 'Enhance your look with elegant ear accessories.',
+  'tikkas': 'Complete your traditional attire with our gorgeous maang tikkas.',
+  'nose-pins': 'Sleek, beautiful, and delicate nose pins for every occasion.',
+  'bangles': 'Intricately designed bangles to grace your wrists.',
+  'hip-chains': 'Stunning hip chains to complete your bridal and ethnic look.',
+  'rings': 'Elegant rings celebrating timeless design and shine.',
+  'hair-accessories': 'Premium hair accessories for bridal and festive styles.',
+  'anklets': 'Traditional and modern anklets to beautify your steps.',
+  'bridal-sets': 'Celebrate your special day with our featured bridal collections.'
 };
 
 const CategoryPage = () => {
   const { products, googleLoading, googleError, fetchNecklaces } = useProductCatalog();
   const { categorySlug } = useParams();
-
-  const category = categoryMapping[categorySlug];
 
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -37,13 +35,36 @@ const CategoryPage = () => {
     setIsQuickViewOpen(false);
   };
 
-  if (!category) {
+  const isCategoryValid = useMemo(() => {
+    if (googleLoading) return true;
+    return products.some((p) => p.categorySlug === categorySlug);
+  }, [products, categorySlug, googleLoading]);
+
+  const categoryLabel = useMemo(() => {
+    const matchedProduct = products.find((p) => p.categorySlug === categorySlug);
+    if (matchedProduct) {
+      return matchedProduct.category;
+    }
+    return categorySlug
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }, [products, categorySlug]);
+
+  const categoryDescription = useMemo(() => {
+    return (
+      categoryDescriptions[categorySlug] ||
+      `Explore our exquisite collection of ${categoryLabel} crafted with precision and elegance.`
+    );
+  }, [categorySlug, categoryLabel]);
+
+  const categoryProducts = useMemo(() => {
+    return products.filter((product) => product.categorySlug === categorySlug);
+  }, [products, categorySlug]);
+
+  if (!googleLoading && !isCategoryValid) {
     return <Navigate to="/collections" replace />;
   }
-
-  const categoryProducts = products.filter(
-    (product) => product.category === category.productCategory
-  );
 
   let pageContent;
   if (googleLoading) {
@@ -110,15 +131,15 @@ const CategoryPage = () => {
       <section className="collections-hero">
         <div className="collections-hero-content reveal-on-scroll">
           <div className="wishlist-breadcrumb" style={{ marginBottom: '15px' }}>
-            <Link to="/">Home</Link> <span>/</span> <Link to="/collections">Collections</Link> <span>/</span> <span className="current-crumb">{category.label}</span>
+            <Link to="/">Home</Link> <span>/</span> <Link to="/collections">Collections</Link> <span>/</span> <span className="current-crumb">{categoryLabel}</span>
           </div>
-          <h1>{category.label}</h1>
-          <p>{category.description}</p>
+          <h1>{categoryLabel}</h1>
+          <p>{categoryDescription}</p>
         </div>
         <div className="collections-hero-image">
           <img
             src={`/assets/cat-${categorySlug}.png`}
-            alt={category.label}
+            alt={categoryLabel}
             onError={(e) => {
               e.target.src = '/assets/product-default.png';
             }}

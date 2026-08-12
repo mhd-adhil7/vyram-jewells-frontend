@@ -1,12 +1,32 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
-import { bridalCollections, homeCollectionItems } from '../data/catalog';
+import { bridalCollections } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 import image from '../../assets/vyramheroimgae.jpeg';
 const HomePage = () => {
   const { products } = useProductCatalog();
+  
+  const categories = useMemo(() => {
+    const unique = [];
+    const seen = new Set();
+    products.forEach((product) => {
+      if (product.category) {
+        const cat = product.category.trim();
+        const lower = cat.toLowerCase();
+        if (!seen.has(lower)) {
+          seen.add(lower);
+          unique.push({
+            slug: product.categorySlug,
+            label: cat
+          });
+        }
+      }
+    });
+    return unique;
+  }, [products]);
+
   const newArrivals = products.slice(0, 10); // Show more items for carousel
   const carouselRef = useRef(null);
 
@@ -140,25 +160,24 @@ const HomePage = () => {
         </div>
 
         <div className="collections-grid">
-          {homeCollectionItems.map((item) => {
-            const slug = item.toLowerCase().replace(' ', '-');
+          {categories.map((cat) => {
             return (
               <Link
-                key={item}
-                to={`/collections/${slug}`}
+                key={cat.slug}
+                to={`/collections/${cat.slug}`}
                 className="collection-item reveal-on-scroll page-transition-link"
                 style={{ textDecoration: 'none' }}
               >
                 <div className="circle-outline">
                   <img
-                    src={`/assets/cat-${slug}.png`}
-                    alt={item}
+                    src={`/assets/cat-${cat.slug}.png`}
+                    alt={cat.label}
                     onError={(e) => {
                       e.target.src = '/assets/product-default.png';
                     }}
                   />
                 </div>
-                <h3>{item.toUpperCase()}</h3>
+                <h3>{cat.label.toUpperCase()}</h3>
               </Link>
             );
           })}

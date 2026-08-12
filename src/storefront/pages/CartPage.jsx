@@ -1,18 +1,22 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
-import { cartRecommendedIds, formatPrice } from '../data/catalog';
+import { formatPrice } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 import { useShop } from '../context/ShopContext';
 
 const WHATSAPP_NUMBER = '9744342857';
 
 const CartPage = () => {
-  const { productsById } = useProductCatalog();
+  const { products } = useProductCatalog();
   const { cartCount, cartItems, cartSubtotal, removeFromCart, setCartQuantity } = useShop();
 
-  const recommendedProducts = cartRecommendedIds.map((id) => productsById[id]).filter(Boolean);
+  const recommendedProducts = useMemo(() => {
+    const cartProductIds = new Set(cartItems.map((item) => item.product.id));
+    const availableRecs = products.filter((p) => !cartProductIds.has(p.id));
+    return availableRecs.length > 0 ? availableRecs.slice(0, 4) : products.slice(0, 4);
+  }, [products, cartItems]);
 
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);

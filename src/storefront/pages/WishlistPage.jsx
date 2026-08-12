@@ -1,15 +1,20 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
-import { formatPrice, wishlistRecommendedIds } from '../data/catalog';
+import { formatPrice } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 import { useShop } from '../context/ShopContext';
 
 const WishlistPage = () => {
-  const { productsById } = useProductCatalog();
+  const { products } = useProductCatalog();
   const { addToCart, removeFromWishlist, wishlistItems } = useShop();
-  const recommendedProducts = wishlistRecommendedIds.map((id) => productsById[id]).filter(Boolean);
+
+  const recommendedProducts = useMemo(() => {
+    const wishlistProductIds = new Set(wishlistItems.map((item) => item.id));
+    const availableRecs = products.filter((p) => !wishlistProductIds.has(p.id));
+    return availableRecs.length > 0 ? availableRecs.slice(0, 4) : products.slice(0, 4);
+  }, [products, wishlistItems]);
 
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
@@ -6,7 +6,7 @@ import { bridalCollections } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 
 const BridalCollectionPage = () => {
-  const { productsById } = useProductCatalog();
+  const { products: allProducts } = useProductCatalog();
   const { collectionSlug } = useParams();
   const collection = bridalCollections.find((item) => item.slug === collectionSlug);
 
@@ -24,11 +24,60 @@ const BridalCollectionPage = () => {
     setIsQuickViewOpen(false);
   };
 
+  const products = useMemo(() => {
+    if (!collection) return [];
+    return allProducts.filter((p) => {
+      if (collection.productIds.includes(p.id)) {
+        return true;
+      }
+
+      const text = `${p.name} ${p.category} ${p.searchKeywords || ''}`.toLowerCase();
+      if (collectionSlug === 'kerala') {
+        return (
+          text.includes('kerala') ||
+          text.includes('palakka') ||
+          text.includes('mullamott') ||
+          text.includes('kasavu') ||
+          text.includes('nagapada') ||
+          text.includes('manga') ||
+          text.includes('mala')
+        );
+      }
+      if (collectionSlug === 'royal-temple') {
+        return (
+          text.includes('temple') ||
+          text.includes('lakshmi') ||
+          text.includes('peacock') ||
+          text.includes('vanki') ||
+          text.includes('jhumka') ||
+          text.includes('divine')
+        );
+      }
+      if (collectionSlug === 'classic-gold') {
+        return (
+          text.includes('gold') ||
+          text.includes('antique') ||
+          text.includes('haar') ||
+          text.includes('tikka') ||
+          text.includes('kada') ||
+          text.includes('traditional')
+        );
+      }
+      if (collectionSlug === 'diamond') {
+        return (
+          text.includes('diamond') ||
+          text.includes('solitaire') ||
+          text.includes('platinum') ||
+          text.includes('tennis')
+        );
+      }
+      return false;
+    });
+  }, [allProducts, collection, collectionSlug]);
+
   if (!collection) {
     return <Navigate to="/bridal" replace />;
   }
-
-  const products = collection.productIds.map((id) => productsById[id]).filter(Boolean);
 
   return (
     <>

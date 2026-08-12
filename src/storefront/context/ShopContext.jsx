@@ -100,7 +100,7 @@ const ShopContext = createContext(null);
 export const ShopProvider = ({ children }) => {
   const { productsById, googleLoading } = useProductCatalog();
 
-  const defaultWishlistIds = useMemo(
+  const _defaultWishlistIds = useMemo(
     () => wishlistDefaultIds.filter((id) => Boolean(productsById[id])),
     [productsById]
   );
