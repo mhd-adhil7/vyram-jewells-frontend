@@ -89,7 +89,13 @@ const CartPage = () => {
             cartItems.map((item) => (
               <div key={item.id} className="cart-item-card">
                 <div className="cart-item-image">
-                  <img src={item.product.image} alt={item.product.name} />
+                  <img
+                    src={item.product.image}
+                    alt={item.product.name}
+                    onError={(e) => {
+                      e.target.src = '/assets/product-default.png';
+                    }}
+                  />
                 </div>
                 <div className="cart-item-details">
                   <h3 className="cart-item-name">{item.product.name}</h3>

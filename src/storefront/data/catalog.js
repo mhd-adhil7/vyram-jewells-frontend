@@ -176,10 +176,16 @@ export const productsById = Object.fromEntries(products.map((product) => [produc
 export const categoryLabels = {
   all: 'All',
   necklaces: 'Necklaces',
+  haram: 'Haram',
   earrings: 'Earrings',
+  'ear-accessories': 'Ear Accessories',
+  tikkas: 'Tikkas',
+  'nose-pins': 'Nose Pins',
   bangles: 'Bangles',
+  'hip-chains': 'Hip Chains',
   rings: 'Rings',
-  temple: 'Temple Jewellery',
+  'hair-accessories': 'Hair Accessories',
+  anklets: 'Anklets',
   bridal: 'Bridal Sets'
 };
 

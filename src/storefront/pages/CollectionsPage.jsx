@@ -10,7 +10,7 @@ import {
 import { useProductCatalog } from '../context/ProductCatalogContext';
 
 const CollectionsPage = () => {
-  const { products } = useProductCatalog();
+  const { products, googleLoading, googleError, fetchNecklaces } = useProductCatalog();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeFilter, setActiveFilter] = useState('all');
 
@@ -107,22 +107,49 @@ const CollectionsPage = () => {
           </div>
         ) : null}
 
-        <div className="product-grid">
-          {filteredProducts.map((product, index) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              showQuickView
-              onQuickView={openQuickView}
-              className="reveal-on-scroll"
-              style={{ transitionDelay: `${(index % 4) * 0.1 + 0.1}s` }}
-            />
-          ))}
-        </div>
+        {googleLoading ? (
+          <div className="empty-wishlist-state reveal-on-scroll" style={{ margin: '40px auto', maxWidth: '600px', textAlign: 'center' }}>
+            <div className="empty-wishlist-icon">
+              <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '3rem', color: 'var(--color-primary-light)' }}></i>
+            </div>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.2rem', color: 'var(--color-primary-dark)', marginBottom: '15px' }}>Loading Collection</h2>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '1.1rem', color: 'var(--color-text-sub)' }}>
+              Loading our exquisite collections for you...
+            </p>
+          </div>
+        ) : googleError ? (
+          <div className="empty-wishlist-state reveal-on-scroll" style={{ margin: '40px auto', maxWidth: '600px', textAlign: 'center' }}>
+            <div className="empty-wishlist-icon">
+              <i className="fa-solid fa-circle-exclamation" style={{ fontSize: '3rem', color: 'var(--color-primary-light)' }}></i>
+            </div>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.2rem', color: 'var(--color-primary-dark)', marginBottom: '15px' }}>Connection Error</h2>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '1.1rem', color: 'var(--color-text-sub)', marginBottom: '35px' }}>
+              We were unable to load the collections. Please check your connection and try again.
+            </p>
+            <button onClick={fetchNecklaces} className="btn btn-primary explore-btn" style={{ cursor: 'pointer', border: 'none' }}>
+              Retry Connection
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="product-grid">
+              {filteredProducts.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  showQuickView
+                  onQuickView={openQuickView}
+                  className="reveal-on-scroll"
+                  style={{ transitionDelay: `${(index % 4) * 0.1 + 0.1}s` }}
+                />
+              ))}
+            </div>
 
-        {filteredProducts.length === 0 ? (
-          <p className="no-results-msg">No jewellery found matching your search.</p>
-        ) : null}
+            {filteredProducts.length === 0 ? (
+              <p className="no-results-msg">No jewellery found matching your search.</p>
+            ) : null}
+          </>
+        )}
 
         <div className="pagination reveal-on-scroll">
           <button type="button" className="page-btn prev-btn">

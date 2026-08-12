@@ -140,14 +140,28 @@ const HomePage = () => {
         </div>
 
         <div className="collections-grid">
-          {homeCollectionItems.map((item) => (
-            <div key={item} className="collection-item reveal-on-scroll">
-              <div className="circle-outline">
-                <img src={`/assets/cat-${item.toLowerCase().replace(' ', '-')}.png`} alt={item} onError={(e) => { e.target.src = '/assets/product-default.png'; }} />
-              </div>
-              <h3>{item.toUpperCase()}</h3>
-            </div>
-          ))}
+          {homeCollectionItems.map((item) => {
+            const slug = item.toLowerCase().replace(' ', '-');
+            return (
+              <Link
+                key={item}
+                to={`/collections/${slug}`}
+                className="collection-item reveal-on-scroll page-transition-link"
+                style={{ textDecoration: 'none' }}
+              >
+                <div className="circle-outline">
+                  <img
+                    src={`/assets/cat-${slug}.png`}
+                    alt={item}
+                    onError={(e) => {
+                      e.target.src = '/assets/product-default.png';
+                    }}
+                  />
+                </div>
+                <h3>{item.toUpperCase()}</h3>
+              </Link>
+            );
+          })}
         </div>
 
         <div className="section-btn">

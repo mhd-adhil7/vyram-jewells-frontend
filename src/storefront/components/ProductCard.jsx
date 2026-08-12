@@ -27,6 +27,7 @@ const ProductCard = ({ product, className = '', showQuickView = false, onQuickVi
 
   const handleToggleWishlist = (event) => {
     event.preventDefault();
+    event.stopPropagation();
     toggleWishlist(product.id);
   };
 
@@ -37,12 +38,26 @@ const ProductCard = ({ product, className = '', showQuickView = false, onQuickVi
       style={style}
     >
       <div className="product-image-container">
-        <img src={product.image} alt={product.name} />
+        <img
+          src={product.image}
+          alt={product.name}
+          onError={(e) => {
+            e.target.src = '/assets/product-default.png';
+          }}
+        />
         <button className="wishlist-btn" type="button" onClick={handleToggleWishlist}>
           <i className={isWishlisted(product.id) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
         </button>
         {showQuickView ? (
-          <button type="button" className="quick-view-btn" onClick={() => onQuickView?.(product)}>
+          <button
+            type="button"
+            className="quick-view-btn"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onQuickView?.(product);
+            }}
+          >
             Quick View
           </button>
         ) : null}
@@ -50,7 +65,15 @@ const ProductCard = ({ product, className = '', showQuickView = false, onQuickVi
       <div className="product-info">
         <h3>{product.name}</h3>
         <p className="price">{formatPrice(product.price)}</p>
-        <button type="button" className="add-cart-btn" onClick={handleAddToCart}>
+        <button
+          type="button"
+          className="add-cart-btn"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            handleAddToCart();
+          }}
+        >
           {justAdded ? 'Added!' : 'Add to Cart'}
         </button>
       </div>

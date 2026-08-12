@@ -6,6 +6,7 @@ import AboutPage from './storefront/pages/AboutPage';
 import BridalCollectionPage from './storefront/pages/BridalCollectionPage';
 import BridalPage from './storefront/pages/BridalPage';
 import CartPage from './storefront/pages/CartPage';
+import CategoryPage from './storefront/pages/CategoryPage';
 import CollectionsPage from './storefront/pages/CollectionsPage';
 import ContactPage from './storefront/pages/ContactPage';
 import HomePage from './storefront/pages/HomePage';
@@ -22,6 +23,7 @@ const App = () => {
               <Route index element={<HomePage />} />
               <Route path="about" element={<AboutPage />} />
               <Route path="collections" element={<CollectionsPage />} />
+              <Route path="collections/:categorySlug" element={<CategoryPage />} />
               <Route path="bridal" element={<BridalPage />} />
               <Route path="bridal/:collectionSlug" element={<BridalCollectionPage />} />
               <Route path="contact" element={<ContactPage />} />

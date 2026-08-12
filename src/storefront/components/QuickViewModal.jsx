@@ -39,7 +39,13 @@ const QuickViewModal = ({ product, isOpen, onClose }) => {
         </button>
         
         <div className="modal-image-container">
-          <img src={product.image} alt={product.name} />
+          <img
+            src={product.image}
+            alt={product.name}
+            onError={(e) => {
+              e.target.src = '/assets/product-default.png';
+            }}
+          />
         </div>
         
         <div className="modal-details">

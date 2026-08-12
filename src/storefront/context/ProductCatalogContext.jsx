@@ -180,12 +180,200 @@ const readStoredProducts = () => {
   }
 };
 
+const parseCSV = (csvText) => {
+  const lines = [];
+  let currentLine = [];
+  let currentToken = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i];
+    const nextChar = csvText[i + 1];
+
+    if (inQuotes) {
+      if (char === '"') {
+        if (nextChar === '"') {
+          currentToken += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        currentToken += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === ',') {
+        currentLine.push(currentToken);
+        currentToken = '';
+      } else if (char === '\r' || char === '\n') {
+        if (char === '\r' && nextChar === '\n') {
+          i++;
+        }
+        currentLine.push(currentToken);
+        lines.push(currentLine);
+        currentLine = [];
+        currentToken = '';
+      } else {
+        currentToken += char;
+      }
+    }
+  }
+
+  if (currentToken || currentLine.length > 0) {
+    currentLine.push(currentToken);
+    lines.push(currentLine);
+  }
+
+  return lines;
+};
+
+const mapCategoryToInternal = (sheetCategory) => {
+  const normalized = String(sheetCategory ?? '')
+    .trim()
+    .toLowerCase();
+
+  switch (normalized) {
+    case 'necklaces':
+    case 'necklace':
+      return 'necklaces';
+    case 'earrings':
+    case 'earring':
+      return 'earrings';
+    case 'rings':
+    case 'ring':
+      return 'rings';
+    case 'bangles':
+    case 'bangle':
+      return 'bangles';
+    case 'bridal':
+    case 'bridal sets':
+    case 'bridal-sets':
+      return 'bridal';
+    case 'temple':
+    case 'temple jewellery':
+    case 'temple-jewellery':
+      return 'temple';
+    case 'haram':
+      return 'haram';
+    case 'ear accessories':
+    case 'ear-accessories':
+      return 'ear-accessories';
+    case 'tikkas':
+    case 'tikka':
+      return 'tikkas';
+    case 'nose pins':
+    case 'nose-pins':
+    case 'nosepin':
+    case 'nosepins':
+      return 'nose-pins';
+    case 'hip chains':
+    case 'hip-chains':
+      return 'hip-chains';
+    case 'hair accessories':
+    case 'hair-accessories':
+      return 'hair-accessories';
+    case 'anklets':
+    case 'anklet':
+      return 'anklets';
+    default:
+      return normalized.replace(/\s+/g, '-');
+  }
+};
+
+const parseProductsFromCSV = (csvText) => {
+  const rows = parseCSV(csvText);
+  const headerIndex = rows.findIndex(row => {
+    const cols = row.map(c => c.trim().toLowerCase());
+    return cols.includes('id') && cols.includes('price') && cols.includes('category') && cols.includes('image');
+  });
+
+  if (headerIndex === -1) {
+    throw new Error('Invalid CSV: Columns id, price, category, and image are required.');
+  }
+
+  const headers = rows[headerIndex].map(h => h.trim().toLowerCase());
+  const idIdx = headers.indexOf('id');
+  const priceIdx = headers.indexOf('price');
+  const categoryIdx = headers.indexOf('category');
+  const imageIdx = headers.indexOf('image');
+
+  const productsList = [];
+  for (let i = headerIndex + 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (row.length <= 1) continue;
+
+    try {
+      const idVal = row[idIdx]?.trim();
+      if (!idVal) continue;
+
+      const rawPrice = row[priceIdx] ?? '';
+      const cleanedPrice = rawPrice.replace(/[^\d.]/g, '');
+      const priceVal = parseFloat(cleanedPrice) || 0;
+
+      const categoryVal = row[categoryIdx]?.trim() || '';
+      const imageVal = row[imageIdx]?.trim() || '';
+
+      const internalCategory = mapCategoryToInternal(categoryVal);
+
+      const displayCategoryName = internalCategory === 'temple' ? 'Temple Jewellery' :
+                                  internalCategory === 'bridal' ? 'Bridal Set' :
+                                  internalCategory.charAt(0).toUpperCase() + internalCategory.slice(1).replace(/-+/g, ' ');
+      const singularName = displayCategoryName.endsWith('s') ? displayCategoryName.slice(0, -1) : displayCategoryName;
+      const nameVal = `${singularName} ${idVal}`;
+
+      productsList.push({
+        id: idVal,
+        name: nameVal,
+        price: priceVal,
+        category: internalCategory,
+        image: imageVal || '/assets/product-default.png',
+        stock: 10
+      });
+    } catch (rowErr) {
+      console.error(`Error parsing row ${i} in CSV:`, row, rowErr);
+    }
+  }
+
+  return productsList;
+};
+
 export const ProductCatalogProvider = ({ children }) => {
-  const [products, setProducts] = useState(() => readStoredProducts() ?? seedCatalogProducts);
+  const [googleProducts, setGoogleProducts] = useState([]);
+  const [googleLoading, setGoogleLoading] = useState(true);
+  const [googleError, setGoogleError] = useState(null);
+
+  const fetchNecklaces = useCallback(async () => {
+    setGoogleLoading(true);
+    setGoogleError(null);
+    try {
+      const response = await fetch(
+        'https://docs.google.com/spreadsheets/d/e/2PACX-1vQGS3Vb_JRbgG_YZcewvzNi4InnNO-ngJxyQDbs89T_Evo_UVxUf9RaxQ0ahB8OrXxysF5TZoFV1RlT/pub?output=csv'
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to fetch product data (HTTP status ${response.status})`);
+      }
+      const csvText = await response.text();
+      console.log('Raw CSV response:', csvText);
+      const parsed = parseProductsFromCSV(csvText);
+      console.log('Parsed product data:', parsed);
+      setGoogleProducts(parsed);
+      setGoogleLoading(false);
+    } catch (err) {
+      console.error('Error fetching products from Google Sheets:', err);
+      setGoogleError(err.message || 'Failed to fetch products');
+      setGoogleLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
-  }, [products]);
+    fetchNecklaces();
+  }, [fetchNecklaces]);
+
+  const products = useMemo(() => {
+    return googleProducts;
+  }, [googleProducts]);
 
   const createProduct = useCallback((input) => {
     const nextProduct = validateCreateInput(input);
@@ -193,7 +381,7 @@ export const ProductCatalogProvider = ({ children }) => {
       throw new Error('A product with this ID already exists.');
     }
 
-    setProducts((prevProducts) => [nextProduct, ...prevProducts]);
+    setGoogleProducts((prevProducts) => [nextProduct, ...prevProducts]);
   }, [products]);
 
   const updateProduct = useCallback((id, patch) => {
@@ -207,7 +395,7 @@ export const ProductCatalogProvider = ({ children }) => {
       throw new Error('Product not found.');
     }
 
-    setProducts((prevProducts) =>
+    setGoogleProducts((prevProducts) =>
       prevProducts.map((item) => (item.id === productId ? { ...item, ...nextValues } : item))
     );
   }, [products]);
@@ -218,7 +406,7 @@ export const ProductCatalogProvider = ({ children }) => {
       throw new Error('Product ID is required.');
     }
 
-    setProducts((prevProducts) => prevProducts.filter((item) => item.id !== productId));
+    setGoogleProducts((prevProducts) => prevProducts.filter((item) => item.id !== productId));
   }, []);
 
   const productsById = useMemo(
@@ -232,9 +420,12 @@ export const ProductCatalogProvider = ({ children }) => {
       productsById,
       createProduct,
       updateProduct,
-      deleteProduct
+      deleteProduct,
+      googleLoading,
+      googleError,
+      fetchNecklaces
     }),
-    [products, productsById, createProduct, updateProduct, deleteProduct]
+    [products, productsById, createProduct, updateProduct, deleteProduct, googleLoading, googleError, fetchNecklaces]
   );
 
   return <ProductCatalogContext.Provider value={value}>{children}</ProductCatalogContext.Provider>;

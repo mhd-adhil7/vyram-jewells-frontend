@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Footer from './Footer';
 import { useShop } from '../context/ShopContext';
+import { useProductCatalog } from '../context/ProductCatalogContext';
 
 const secondaryNavItems = [
   { to: '/', label: 'Home', end: true },
@@ -13,6 +14,7 @@ const secondaryNavItems = [
 
 const StoreLayout = () => {
   const { cartCount, wishlistCount } = useShop();
+  const { products } = useProductCatalog();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
@@ -45,7 +47,7 @@ const StoreLayout = () => {
     return () => {
       observer.disconnect();
     };
-  }, [location.pathname, location.search]);
+  }, [location.pathname, location.search, products]);
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();

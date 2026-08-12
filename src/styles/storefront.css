@@ -1994,6 +1994,24 @@ body.page-transitioning {
     margin-bottom: 50px;
 }
 
+/* On smaller screens, switch to horizontal scroll so filter pills never shrink or overlap */
+@media (max-width: 900px) {
+    .category-filter {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+    }
+    .category-filter::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+    }
+    .category-filter .filter-pill {
+        flex-shrink: 0;
+    }
+}
+
 .filter-pill {
     padding: 10px 25px;
     border-radius: 30px;
@@ -3462,3 +3480,29 @@ button:active, .btn:active, .btn-outline-rect:active, .add-cart-btn:active, .wis
         height: 360px;
     }
 }
+
+/* --- Fix Quick View Button Functionality --- */
+
+/* Ensure the buttons have high z-index and are clickable */
+.quick-view-btn, 
+.btn-quick-view, 
+.wishlist-btn, 
+.wishlist-remove-btn {
+    z-index: 10 !important;
+    pointer-events: auto !important;
+}
+
+/* Prevent image from blocking pointer events */
+.product-image-container img {
+    pointer-events: none;
+}
+
+/* Make Quick View button always visible on tablets and mobile (touch interfaces) */
+@media (max-width: 1024px) {
+    .quick-view-btn {
+        bottom: 20px !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+}
+

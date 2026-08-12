@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import QuickViewModal from '../components/QuickViewModal';
 import { formatPrice, wishlistRecommendedIds } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 import { useShop } from '../context/ShopContext';
@@ -8,6 +10,18 @@ const WishlistPage = () => {
   const { productsById } = useProductCatalog();
   const { addToCart, removeFromWishlist, wishlistItems } = useShop();
   const recommendedProducts = wishlistRecommendedIds.map((id) => productsById[id]).filter(Boolean);
+
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const openQuickView = (product) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
+
+  const closeQuickView = () => {
+    setIsQuickViewOpen(false);
+  };
 
   const handleMoveToCart = (productId) => {
     addToCart(productId);
@@ -35,14 +49,34 @@ const WishlistPage = () => {
                   style={{ transitionDelay: `${(index + 1) * 0.1}s` }}
                 >
                   <div className="product-image-container">
-                    <img src={product.image} alt={product.name} />
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      onError={(e) => {
+                        e.target.src = '/assets/product-default.png';
+                      }}
+                    />
                     <button
                       type="button"
                       className="wishlist-remove-btn"
                       title="Remove from wishlist"
-                      onClick={() => removeFromWishlist(product.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFromWishlist(product.id);
+                      }}
                     >
                       <i className="fa-solid fa-heart pulse-heart"></i>
+                    </button>
+                    <button
+                      type="button"
+                      className="quick-view-btn"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openQuickView(product);
+                      }}
+                    >
+                      Quick View
                     </button>
                   </div>
                   <div className="product-info">
@@ -51,7 +85,10 @@ const WishlistPage = () => {
                     <button
                       type="button"
                       className="add-cart-btn btn-full-width-wishlist"
-                      onClick={() => handleMoveToCart(product.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveToCart(product.id);
+                      }}
                     >
                       Add to Cart
                     </button>
@@ -84,10 +121,21 @@ const WishlistPage = () => {
 
         <div className="product-grid list-recommended">
           {recommendedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              showQuickView
+              onQuickView={openQuickView}
+            />
           ))}
         </div>
       </section>
+
+      <QuickViewModal
+        product={quickViewProduct}
+        isOpen={isQuickViewOpen}
+        onClose={closeQuickView}
+      />
     </main>
   );
 };

@@ -98,7 +98,7 @@ const readStorage = (key) => {
 const ShopContext = createContext(null);
 
 export const ShopProvider = ({ children }) => {
-  const { productsById } = useProductCatalog();
+  const { productsById, googleLoading } = useProductCatalog();
 
   const defaultWishlistIds = useMemo(
     () => wishlistDefaultIds.filter((id) => Boolean(productsById[id])),
@@ -110,25 +110,36 @@ export const ShopProvider = ({ children }) => {
     [productsById]
   );
 
-  const [cart, setCart] = useState(() => normalizeCart(readStorage(CART_STORAGE_KEY), productsById, nameToId));
-  const [wishlist, setWishlist] = useState(() =>
-    normalizeWishlist(readStorage(WISHLIST_STORAGE_KEY), productsById, nameToId, {
-      fallbackToDefault: true,
-      defaultWishlistIds
-    })
-  );
+  const [cart, setCart] = useState(() => {
+    const raw = readStorage(CART_STORAGE_KEY);
+    if (!Array.isArray(raw)) return [];
+    return raw.map((entry) => {
+      if (typeof entry === 'string') return { id: entry, quantity: 1 };
+      if (entry && typeof entry === 'object') {
+        return { id: entry.id, quantity: entry.quantity ?? entry.qty ?? 1 };
+      }
+      return null;
+    }).filter(Boolean);
+  });
+
+  const [wishlist, setWishlist] = useState(() => {
+    const raw = readStorage(WISHLIST_STORAGE_KEY);
+    return Array.isArray(raw) ? raw : [];
+  });
 
   useEffect(() => {
+    if (googleLoading) return;
     const normalizedCart = normalizeCart(cart, productsById, nameToId);
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(normalizedCart));
-  }, [cart, productsById, nameToId]);
+  }, [cart, productsById, nameToId, googleLoading]);
 
   useEffect(() => {
+    if (googleLoading) return;
     const normalizedWishlist = normalizeWishlist(wishlist, productsById, nameToId, {
       fallbackToDefault: false
     });
     window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(normalizedWishlist));
-  }, [wishlist, productsById, nameToId]);
+  }, [wishlist, productsById, nameToId, googleLoading]);
 
   const cartItems = useMemo(
     () =>
