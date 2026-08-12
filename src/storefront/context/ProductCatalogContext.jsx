@@ -308,12 +308,6 @@ const parseProductsFromCSV = (csvText) => {
   const imageIdx = headers.indexOf('image');
 
   const productsList = [];
-  const fallbackNames = {
-    '1': 'Palakka Necklace',
-    '2': 'Bridal Haram',
-    '3': 'Earrings',
-    '4': 'Bridal Sets'
-  };
 
   for (let i = headerIndex + 1; i < rows.length; i++) {
     const row = rows[i];
@@ -332,7 +326,21 @@ const parseProductsFromCSV = (csvText) => {
 
       let nameVal = nameIdx !== -1 ? row[nameIdx]?.trim() : '';
       if (!nameVal) {
-        nameVal = fallbackNames[idVal] || categoryVal || 'Jewellery';
+        const fallbackCleanNames = {
+          '1': 'Necklace',
+          '2': 'Haram',
+          '3': 'Earring',
+          '4': 'Bridal Set'
+        };
+        const singularCategory = categoryVal.endsWith('s') ? categoryVal.slice(0, -1) : categoryVal;
+        nameVal = fallbackCleanNames[idVal] || singularCategory || 'Jewellery';
+      }
+
+      // Never append, concatenate, or display the id with the product name.
+      // If the name ends with the ID, strip it.
+      const idStr = String(idVal);
+      if (nameVal.endsWith(idStr)) {
+        nameVal = nameVal.slice(0, -idStr.length).trim();
       }
 
       const keywordsVal = keywordsIdx !== -1 ? row[keywordsIdx]?.trim() : '';
