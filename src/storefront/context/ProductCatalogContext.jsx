@@ -47,9 +47,34 @@ const normalizeStock = (value, fallback = DEFAULT_STOCK) => {
   return Math.floor(parsed);
 };
 
+const transformUploadcareUrl = (url) => {
+  if (!url) return url;
+  
+  const regex = /^(https?:\/\/[a-z0-9.-]+\.(?:ucarecd\.net|ucarecdn\.com)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/([^\/]+))?$/i;
+  const match = url.match(regex);
+  
+  if (match) {
+    const base = match[1];
+    const filename = match[2];
+    
+    if (url.includes('/-/')) {
+      return url;
+    }
+    
+    if (filename) {
+      return `${base}/-/preview/-/format/auto/${filename}`;
+    } else {
+      return `${base}/-/preview/-/format/auto/`;
+    }
+  }
+  
+  return url;
+};
+
 const normalizeImage = (value) => {
   const image = String(value ?? '').trim();
-  return image || defaultProductImage;
+  const transformed = transformUploadcareUrl(image);
+  return transformed || defaultProductImage;
 };
 
 const validateCreateInput = (raw) => {
@@ -345,16 +370,18 @@ const parseProductsFromCSV = (csvText) => {
 
       const keywordsVal = keywordsIdx !== -1 ? row[keywordsIdx]?.trim() : '';
 
-      productsList.push({
+      const productObj = {
         id: idVal,
         name: nameVal,
         price: priceVal,
         category: categoryVal,
         categorySlug: slugifyCategory(categoryVal),
         searchKeywords: keywordsVal,
-        image: imageVal || '/assets/product-default.png',
+        image: normalizeImage(imageVal),
         stock: 10
-      });
+      };
+
+      productsList.push(productObj);
     } catch (rowErr) {
       console.error(`Error parsing row ${i} in CSV:`, row, rowErr);
     }
