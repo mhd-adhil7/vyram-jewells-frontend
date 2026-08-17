@@ -1,33 +1,19 @@
-import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import ProductCard from '../components/ProductCard';
-import QuickViewModal from '../components/QuickViewModal';
+import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '../data/catalog';
-import { useProductCatalog } from '../context/ProductCatalogContext';
 import { useShop } from '../context/ShopContext';
 
 const WHATSAPP_NUMBER = '9744342857';
 
 const CartPage = () => {
-  const { products } = useProductCatalog();
   const { cartCount, cartItems, cartSubtotal, removeFromCart, setCartQuantity } = useShop();
+  const navigate = useNavigate();
 
-  const recommendedProducts = useMemo(() => {
-    const cartProductIds = new Set(cartItems.map((item) => item.product.id));
-    const availableRecs = products.filter((p) => !cartProductIds.has(p.id));
-    return availableRecs.length > 0 ? availableRecs.slice(0, 4) : products.slice(0, 4);
-  }, [products, cartItems]);
-
-  const [quickViewProduct, setQuickViewProduct] = useState(null);
-  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-
-  const openQuickView = (product) => {
-    setQuickViewProduct(product);
-    setIsQuickViewOpen(true);
-  };
-
-  const closeQuickView = () => {
-    setIsQuickViewOpen(false);
+  const handleClose = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/collections');
+    }
   };
 
   const handleCheckout = () => {
@@ -53,149 +39,113 @@ const CartPage = () => {
   };
 
   return (
-    <main className="cart-page">
-      <div className="cart-header">
-        <h1>Shopping Cart</h1>
-        <p>Review your selected jewellery pieces.</p>
-        <div className="cart-breadcrumb">
-          <Link to="/">Home</Link> <span>/</span>
-          <Link to="/collections">Collections</Link> <span>/</span>
-          Cart
+    <div className="cart-page-overlay" onClick={handleClose}>
+      <div className="cart-drawer-panel" onClick={(e) => e.stopPropagation()}>
+        <div className="cart-drawer-header">
+          <div className="cart-header-title-container">
+            <h2>Your Cart</h2>
+            <span className="cart-header-count">
+              {cartCount} {cartCount === 1 ? 'Item' : 'Items'}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="cart-close-btn"
+            onClick={handleClose}
+            aria-label="Close Cart"
+          >
+            <i className="fa-solid fa-xmark"></i>
+          </button>
         </div>
-      </div>
 
-      <div className="cart-content-wrapper">
-        <div className="cart-items-container">
+        <div className="cart-drawer-body">
           {cartCount === 0 ? (
-            <p
-              className="empty-cart-msg"
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '1.1rem',
-                color: 'var(--color-text-sub)',
-                padding: '40px',
-                textAlign: 'center'
-              }}
-            >
-              Your cart is currently empty.{' '}
-              <Link
-                to="/collections"
-                style={{
-                  color: 'var(--color-primary-dark)',
-                  textDecoration: 'underline',
-                  fontWeight: 500
-                }}
-              >
-                Continue shopping
-              </Link>
-            </p>
-          ) : (
-            cartItems.map((item) => (
-              <div key={item.id} className="cart-item-card">
-                <div className="cart-item-image">
-                  <img
-                    src={item.product.image}
-                    alt={item.product.name}
-                    onError={(e) => {
-                      e.target.src = '/assets/product-default.png';
-                    }}
-                  />
-                </div>
-                <div className="cart-item-details">
-                  <h3 className="cart-item-name">{item.product.name}</h3>
-                  <p className="cart-item-category">Jewellery</p>
-                  <p className="cart-item-price" data-price={item.product.price}>
-                    {formatPrice(item.product.price)}
-                  </p>
-                  <p className="cart-item-subtotal">
-                    Subtotal: {formatPrice(item.product.price * item.quantity)}
-                  </p>
-                </div>
-                <div className="cart-item-actions">
-                  <div className="quantity-selector">
-                    <button
-                      type="button"
-                      className="qty-btn qty-minus"
-                      onClick={() => setCartQuantity(item.id, item.quantity - 1)}
-                    >
-                      -
-                    </button>
-                    <input type="text" className="qty-input" value={item.quantity} readOnly />
-                    <button
-                      type="button"
-                      className="qty-btn qty-plus"
-                      onClick={() => setCartQuantity(item.id, item.quantity + 1)}
-                    >
-                      +
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="remove-btn"
-                    onClick={() => removeFromCart(item.id)}
-                  >
-                    <i className="fa-solid fa-trash-can"></i>
-                  </button>
-                </div>
+            <div className="cart-empty-state">
+              <div className="cart-empty-icon-container">
+                <i className="fa-regular fa-gem"></i>
               </div>
-            ))
+              <h3>Your cart is empty</h3>
+              <p>Explore our premium collections and add your favorite jewellery pieces.</p>
+              <button
+                type="button"
+                className="cart-continue-btn"
+                onClick={handleClose}
+              >
+                Continue Shopping
+              </button>
+            </div>
+          ) : (
+            <div className="cart-drawer-items-list">
+              {cartItems.map((item) => (
+                <div key={item.id} className="cart-drawer-item-card">
+                  <div className="cart-drawer-item-image">
+                    <img
+                      src={item.product.image}
+                      alt={item.product.name}
+                      onError={(e) => {
+                        e.target.src = '/assets/product-default.png';
+                      }}
+                    />
+                  </div>
+                  <div className="cart-drawer-item-details">
+                    <h4 className="cart-drawer-item-name">{item.product.name}</h4>
+                    <p className="cart-drawer-item-price">
+                      {formatPrice(item.product.price)}
+                    </p>
+                    <div className="cart-drawer-item-actions-row">
+                      <div className="cart-drawer-qty-selector">
+                        <button
+                          type="button"
+                          className="cart-qty-btn minus"
+                          onClick={() => setCartQuantity(item.id, item.quantity - 1)}
+                          aria-label="Decrease quantity"
+                        >
+                          −
+                        </button>
+                        <span className="cart-qty-val">{item.quantity}</span>
+                        <button
+                          type="button"
+                          className="cart-qty-btn plus"
+                          onClick={() => setCartQuantity(item.id, item.quantity + 1)}
+                          aria-label="Increase quantity"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        className="cart-item-remove-btn"
+                        onClick={() => removeFromCart(item.id)}
+                        aria-label="Remove item"
+                      >
+                        <i className="fa-solid fa-trash-can"></i>
+                        <span>Remove</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
-        <div className="cart-summary-container">
-          <div className="cart-summary-card">
-            <h3>Summary</h3>
-            <div className="summary-row">
-              <span>Subtotal</span>
-              <span className="subtotal-val">{formatPrice(cartSubtotal)}</span>
+        {cartCount > 0 && (
+          <div className="cart-drawer-footer">
+            <div className="cart-drawer-subtotal-row">
+              <span className="subtotal-label">Subtotal</span>
+              <span className="subtotal-price">{formatPrice(cartSubtotal)}</span>
             </div>
-            <div className="summary-row">
-              <span>Shipping</span>
-              <span>Complimentary</span>
-            </div>
-            <div className="summary-row">
-              <span>Discount</span>
-              <span>-₹0</span>
-            </div>
-            <div className="summary-row total">
-              <span>Total Price</span>
-              <span className="price-val total-val">{formatPrice(cartSubtotal)}</span>
-            </div>
-            <div className="cart-summary-btns">
-              <button type="button" className="btn-full-width btn-checkout" onClick={handleCheckout}>
-                Proceed to Checkout
-              </button>
-              <Link to="/collections" className="btn-full-width btn-continue page-transition-link">
-                Continue Shopping
-              </Link>
-            </div>
+            <button
+              type="button"
+              className="cart-checkout-btn"
+              onClick={handleCheckout}
+            >
+              Checkout
+            </button>
           </div>
-        </div>
+        )}
       </div>
-
-      <div className="recommended-section">
-        <div className="recommended-header">
-          <h2>You May Also Like</h2>
-        </div>
-        <div className="product-grid">
-          {recommendedProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              showQuickView
-              onQuickView={openQuickView}
-            />
-          ))}
-        </div>
-      </div>
-
-      <QuickViewModal
-        product={quickViewProduct}
-        isOpen={isQuickViewOpen}
-        onClose={closeQuickView}
-      />
-    </main>
+    </div>
   );
 };
 

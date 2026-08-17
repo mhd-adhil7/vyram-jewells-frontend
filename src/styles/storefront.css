@@ -2286,10 +2286,6 @@ body.page-transitioning {
 }
 
 @media (max-width: 480px) {
-    .product-grid {
-        grid-template-columns: 1fr;
-    }
-    
     .collections-hero-image {
         height: 300px;
     }
@@ -2561,290 +2557,342 @@ body.page-transitioning {
     }
 }
 
-/* --- Cart Page Styles --- */
-.cart-page {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 60px 5%;
+/* --- Cart Drawer Overlay Layout --- */
+.cart-page-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    justify-content: flex-end;
+    animation: fadeInOverlay 0.3s ease forwards;
 }
 
-/* Section 1: Page Header */
-.cart-header {
-    text-align: center;
-    margin-bottom: 50px;
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.cart-header h1 {
+.cart-drawer-panel {
+    background: var(--color-page-bg);
+    width: 420px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -10px 0 35px rgba(116, 139, 111, 0.1);
+    animation: slideInDrawer 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInDrawer {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+/* Header styling */
+.cart-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(116, 139, 111, 0.15);
+    background: var(--color-white);
+}
+
+.cart-header-title-container {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.cart-drawer-header h2 {
     font-family: var(--font-heading);
-    font-size: 3.5rem;
+    font-size: 1.5rem;
     color: var(--color-primary-dark);
-    margin-bottom: 10px;
+    margin: 0;
 }
 
-.cart-header p {
+.cart-header-count {
     font-family: var(--font-body);
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     color: var(--color-text-sub);
-    margin-bottom: 20px;
-}
-
-.cart-breadcrumb {
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    color: var(--color-text-sub);
-}
-
-.cart-breadcrumb a {
-    color: var(--color-primary-dark);
     font-weight: 500;
 }
 
-.cart-breadcrumb a:hover {
-    text-decoration: underline;
-}
-
-.cart-breadcrumb span {
-    margin: 0 8px;
-    color: #C5A059; /* Gold separator */
-}
-
-/* Section 2 & 3: Cart Layout */
-.cart-content-wrapper {
-    display: flex;
-    gap: 40px;
-    margin-bottom: 80px;
-}
-
-/* Cart Product List */
-.cart-items-container {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.cart-item-card {
+.cart-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--color-primary-dark);
+    cursor: pointer;
+    padding: 4px;
     display: flex;
     align-items: center;
-    background: var(--color-white);
+    justify-content: center;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.cart-close-btn:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
+}
+
+/* Body and scrolling */
+.cart-drawer-body {
+    flex-grow: 1;
+    overflow-y: auto;
     padding: 20px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(116, 139, 111, 0.05);
-    transition: all 0.4s ease;
-    animation: fadeIn 0.8s ease backwards;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Staggered animation delays for cart items */
-.cart-item-card:nth-child(1) { animation-delay: 0.1s; }
-.cart-item-card:nth-child(2) { animation-delay: 0.2s; }
-.cart-item-card:nth-child(3) { animation-delay: 0.3s; }
-
-.cart-item-card:hover {
-    box-shadow: 0 15px 40px rgba(116, 139, 111, 0.1);
-    transform: translateY(-3px);
+.cart-drawer-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.cart-item-image {
-    width: 120px;
-    height: 120px;
-    border-radius: 12px;
+/* Cart Item Card */
+.cart-drawer-item-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: var(--color-white);
+    padding: 12px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(116, 139, 111, 0.03);
+    border: 1px solid rgba(116, 139, 111, 0.05);
+    transition: all 0.3s ease;
+}
+
+.cart-drawer-item-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(116, 139, 111, 0.08);
+}
+
+.cart-drawer-item-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
     overflow: hidden;
-    margin-right: 25px;
     flex-shrink: 0;
+    border: 1px solid rgba(116, 139, 111, 0.05);
 }
 
-.cart-item-image img {
+.cart-drawer-item-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
 }
 
-.cart-item-card:hover .cart-item-image img {
-    transform: scale(1.1); /* Hover image zoom */
+.cart-drawer-item-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.cart-item-details {
-    flex: 1;
-}
-
-.cart-item-name {
+.cart-drawer-item-name {
     font-family: var(--font-heading);
-    font-size: 1.4rem;
+    font-size: 1rem;
     color: var(--color-primary-dark);
-    margin-bottom: 5px;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.cart-item-category {
+.cart-drawer-item-price {
     font-family: var(--font-body);
     font-size: 0.95rem;
-    color: var(--color-text-sub);
-    margin-bottom: 15px;
-}
-
-.cart-item-price {
-    font-family: var(--font-body);
-    font-size: 1.15rem;
     font-weight: 600;
-    color: #C5A059; /* Gold color for price */
+    color: #C5A059; /* Gold accent */
+    margin: 0;
 }
 
-.cart-item-subtotal {
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    color: var(--color-text-sub);
-    margin-top: 4px;
+.cart-drawer-item-actions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
 }
 
-.cart-item-actions {
+/* Quantity Selector: Rounded Compact Controls */
+.cart-drawer-qty-selector {
     display: flex;
     align-items: center;
-    gap: 30px;
-    margin-left: 20px;
+    background-color: #FAF8F5;
+    border: 1px solid rgba(116, 139, 111, 0.15);
+    border-radius: 20px;
+    padding: 2px 4px;
 }
 
-/* Quantity Selector */
-.quantity-selector {
-    display: flex;
-    align-items: center;
-    background-color: var(--color-page-bg);
-    border: 1px solid rgba(116, 139, 111, 0.2);
-    border-radius: 30px;
-    padding: 5px 10px;
-}
-
-.qty-btn {
+.cart-qty-btn {
     background: none;
     border: none;
-    font-size: 1.2rem;
+    font-size: 1rem;
+    font-weight: bold;
     color: var(--color-primary-dark);
     cursor: pointer;
-    width: 25px;
-    height: 25px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.2s ease;
 }
 
-.qty-btn:hover {
-    transform: scale(1.2); /* Micro animation */
+.cart-qty-btn:active {
+    transform: scale(0.85);
 }
 
-.qty-input {
-    width: 35px;
-    text-align: center;
-    background: none;
-    border: none;
+.cart-qty-val {
     font-family: var(--font-body);
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--color-text-main);
-    pointer-events: none; /* Disable manual typing for simplicity */
-}
-
-.remove-btn {
-    background: none;
-    border: none;
-    color: var(--color-text-sub);
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.cart-item-card:hover .remove-btn {
-    color: #e74c3c; /* Remove icon highlight on card hover */
-}
-
-.remove-btn:hover {
-    transform: scale(1.1);
-}
-
-/* Cart Summary */
-.cart-summary-container {
-    flex: 1;
-}
-
-.cart-summary-card {
-    background: var(--color-white);
-    padding: 35px 30px;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(116, 139, 111, 0.08);
-    position: sticky;
-    top: 30px;
-}
-
-.cart-summary-card h3 {
-    font-family: var(--font-heading);
-    font-size: 1.8rem;
-    color: var(--color-primary-dark);
-    margin-bottom: 25px;
-    border-bottom: 1px solid rgba(116, 139, 111, 0.1);
-    padding-bottom: 15px;
-}
-
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    font-family: var(--font-body);
-    font-size: 1.05rem;
-    color: var(--color-text-sub);
-    margin-bottom: 15px;
-}
-
-.summary-row.total {
-    margin-top: 25px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(116, 139, 111, 0.1);
-    font-size: 1.3rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: var(--color-primary-dark);
+    color: var(--color-text-main);
+    width: 24px;
+    text-align: center;
 }
 
-.summary-row.total .price-val {
-    color: #C5A059; /* Gold for final total */
+/* Remove button */
+.cart-item-remove-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-sub);
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.cart-summary-btns {
-    margin-top: 35px;
+.cart-item-remove-btn i {
+    font-size: 0.85rem;
+}
+
+.cart-item-remove-btn:hover {
+    color: #e74c3c;
+    transform: scale(1.05);
+}
+
+/* Sticky Footer area */
+.cart-drawer-footer {
+    background: var(--color-white);
+    border-top: 1px solid rgba(116, 139, 111, 0.15);
+    padding: 24px 20px;
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-.btn-full-width {
-    width: 100%;
-    padding: 15px;
-    border-radius: 30px;
+.cart-drawer-subtotal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subtotal-label {
     font-family: var(--font-body);
     font-size: 1.05rem;
     font-weight: 500;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.4s ease;
-    border: none;
+    color: var(--color-text-main);
 }
 
-.btn-checkout {
+.subtotal-price {
+    font-family: var(--font-body);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #C5A059;
+}
+
+.cart-checkout-btn {
+    width: 100%;
+    padding: 14px;
     background-color: var(--color-primary-dark);
     color: var(--color-white);
-    box-shadow: 0 5px 15px rgba(116, 139, 111, 0.2);
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(116, 139, 111, 0.15);
 }
 
-.btn-checkout:hover {
+.cart-checkout-btn:hover {
     background-color: #5d6e5b;
-    transform: translateY(-3px); /* Button hover lift effect */
-    box-shadow: 0 8px 25px rgba(116, 139, 111, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(116, 139, 111, 0.25);
 }
 
-.btn-continue {
+.cart-checkout-btn:active {
+    transform: scale(0.98);
+}
+
+/* Empty State */
+.cart-empty-state {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.cart-empty-icon-container {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background-color: #FAF6EF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: var(--color-primary-light);
+    font-size: 2.2rem;
+}
+
+.cart-empty-state h3 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    color: var(--color-primary-dark);
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.cart-empty-state p {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--color-text-sub);
+    line-height: 1.5;
+    margin: 0 0 24px;
+}
+
+.cart-continue-btn {
+    padding: 12px 30px;
     background-color: transparent;
     color: var(--color-primary-dark);
     border: 1px solid var(--color-primary-dark);
+    border-radius: 30px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.btn-continue:hover {
-    background-color: var(--color-page-bg);
+.cart-continue-btn:hover {
+    background-color: var(--color-white);
     transform: translateY(-2px);
 }
 
@@ -2876,37 +2924,22 @@ body.page-transitioning {
     }
 }
 
-/* Responsive adjustments for Cart */
-@media (max-width: 900px) {
-    .cart-content-wrapper {
-        flex-direction: column;
-    }
-    
-    .cart-summary-card {
-        position: static;
-        margin-top: 20px;
-    }
-}
-
+/* Mobile Responsive Cart Drawer */
 @media (max-width: 600px) {
-    .cart-item-card {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 20px;
+    .cart-drawer-panel {
+        width: 100% !important;
     }
     
-    .cart-item-image {
-        width: 100%;
-        height: 200px;
-        margin-right: 0;
-        margin-bottom: 20px;
+    .cart-drawer-header {
+        padding: 20px 16px;
     }
     
-    .cart-item-actions {
-        margin-left: 0;
-        margin-top: 20px;
-        width: 100%;
-        justify-content: space-between;
+    .cart-drawer-body {
+        padding: 16px;
+    }
+    
+    .cart-drawer-footer {
+        padding: 20px 16px;
     }
 }
 
@@ -3503,6 +3536,162 @@ button:active, .btn:active, .btn-outline-rect:active, .add-cart-btn:active, .wis
         bottom: 20px !important;
         opacity: 1 !important;
         visibility: visible !important;
+    }
+}
+
+/* Mobile Product Grid & Compact Card Layout Redesign */
+@media (max-width: 600px) {
+    /* 1. Mobile Grid layout: exactly 2 columns, small gap */
+    .product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        margin-bottom: 30px !important;
+    }
+
+    /* 2. Container side padding to prevent overlapping with floating social/contact icons */
+    .main-collections,
+    .new-arrivals-section,
+    .wishlist-grid,
+    .list-recommended {
+        padding-left: 12px !important;
+        padding-right: 64px !important; /* Space on the right for fixed sticky-socials */
+    }
+    
+    /* 3. Make all cards stretch to equal height in each row */
+    .product-card {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 15px rgba(116, 139, 111, 0.04) !important;
+    }
+
+    /* 4. Compact Image Container with square ratio */
+    .product-image-container {
+        height: auto !important;
+        aspect-ratio: 1 / 1.1 !important;
+        padding-top: 0 !important;
+    }
+
+    /* 5. Compact Product Info section */
+    .product-info {
+        padding: 10px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        flex-grow: 1 !important;
+        text-align: center !important;
+    }
+
+    /* 6. Typography scaling for mobile */
+    .product-info h3 {
+        font-size: 0.85rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 6px !important;
+        font-weight: 500 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        min-height: 2.6em !important; /* reserves space for exactly 2 lines so alignment is perfect */
+    }
+
+    .product-info .price {
+        font-size: 0.85rem !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* 7. Compact Add to Cart Button */
+    .add-cart-btn {
+        padding: 8px 12px !important;
+        font-size: 0.75rem !important;
+        border-radius: 20px !important;
+        margin-top: auto !important;
+        width: 100% !important;
+    }
+
+    /* 8. Position the wishlist heart icon compactly */
+    .wishlist-btn {
+        top: 8px !important;
+        right: 8px !important;
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* 9. Hide Quick View Button on mobile */
+    .quick-view-btn {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+}
+
+/* --- Quick View Lightbox Modal Redesign --- */
+.quick-view-modal.image-preview-modal {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: var(--color-white) !important;
+    border-radius: 20px !important;
+    position: relative !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15) !important;
+    padding: 30px !important;
+    max-width: 600px !important;
+    width: 90% !important;
+    height: auto !important;
+    max-height: 85vh !important;
+    box-sizing: border-box !important;
+}
+
+.modal-image-container.preview-only {
+    width: 100% !important;
+    height: auto !important;
+    flex: 1 !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+}
+
+.modal-image-container.preview-only img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 70vh !important;
+    object-fit: contain !important;
+    border-radius: 12px !important;
+}
+
+/* Close button layout adjustment */
+.quick-view-modal.image-preview-modal .close-modal-btn {
+    top: 15px !important;
+    right: 15px !important;
+    background: rgba(250, 246, 239, 0.8) !important;
+    width: 35px !important;
+    height: 35px !important;
+    font-size: 1.1rem !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+}
+
+@media (max-width: 600px) {
+    .quick-view-modal.image-preview-modal {
+        padding: 20px !important;
+        max-height: 80vh !important;
+    }
+    
+    .modal-image-container.preview-only img {
+        max-height: 60vh !important;
+        width: 85% !important; /* Image should use approx 80-90% of available modal width */
+    }
+    
+    .quick-view-modal.image-preview-modal .close-modal-btn {
+        top: 10px !important;
+        right: 10px !important;
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 1rem !important;
     }
 }
 
