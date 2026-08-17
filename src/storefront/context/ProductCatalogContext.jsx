@@ -376,7 +376,7 @@ const parseProductsFromCSV = (csvText) => {
         price: priceVal,
         category: categoryVal,
         categorySlug: slugifyCategory(categoryVal),
-        searchKeywords: keywordsVal,
+        search_keywords: keywordsVal,
         image: normalizeImage(imageVal),
         stock: 10
       };
@@ -385,6 +385,13 @@ const parseProductsFromCSV = (csvText) => {
     } catch (rowErr) {
       console.error(`Error parsing row ${i} in CSV:`, row, rowErr);
     }
+  }
+
+  if (productsList.length > 0) {
+    console.log("DEBUG: Logging first 5 parsed products:");
+    productsList.slice(0, 5).forEach((p, idx) => {
+      console.log(`[Product ${idx + 1}] Name: ${p.name} | Category: ${p.category} | search_keywords: ${p.search_keywords}`);
+    });
   }
 
   return productsList;

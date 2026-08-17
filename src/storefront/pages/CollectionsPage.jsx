@@ -34,6 +34,12 @@ const CollectionsPage = () => {
     setSearchParams(nextParams);
   };
 
+  const handleClearSearch = () => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('q');
+    setSearchParams(nextParams);
+  };
+
   const categories = useMemo(() => {
     const unique = [];
     const seen = new Set();
@@ -63,15 +69,21 @@ const CollectionsPage = () => {
         return true;
       }
 
-      const searchLower = searchTerm.toLowerCase().trim();
-      const nameMatch = product.name?.toLowerCase().includes(searchLower);
-      
-      const keywords = product.searchKeywords || '';
-      const keywordMatch = keywords
-        .split(',')
-        .some(kw => kw.trim().toLowerCase().includes(searchLower));
+      const normalizedQuery = searchTerm
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ' ');
 
-      return nameMatch || keywordMatch;
+      const searchableText = [
+        product.name,
+        product.search_keywords,
+        product.category
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      return searchableText.includes(normalizedQuery);
     });
   }, [activeFilter, products, searchTerm]);
 
@@ -162,42 +174,65 @@ const CollectionsPage = () => {
           </div>
         ) : (
           <>
-            <div className="product-grid">
-              {filteredProducts.map((product, index) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  showQuickView
-                  onQuickView={openQuickView}
-                  className="reveal-on-scroll"
-                  style={{ transitionDelay: `${(index % 4) * 0.1 + 0.1}s` }}
-                />
-              ))}
-            </div>
-
             {filteredProducts.length === 0 ? (
-              <p className="no-results-msg">No jewellery found matching your search.</p>
-            ) : null}
+              <div className="no-results-container reveal-on-scroll" style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: 'var(--color-white)', borderRadius: '20px', boxShadow: '0 10px 30px rgba(116, 139, 111, 0.03)', maxWidth: '500px', margin: '40px auto' }}>
+                <p className="no-results-msg" style={{ fontFamily: 'var(--font-body)', fontSize: '1.25rem', color: 'var(--color-text-sub)', marginBottom: '15px' }}>
+                  No products found
+                </p>
+                <button 
+                  type="button" 
+                  onClick={handleClearSearch}
+                  className="clear-search-btn"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--color-primary-dark)',
+                    textDecoration: 'underline',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontFamily: 'var(--font-body)'
+                  }}
+                >
+                  Clear Search
+                </button>
+              </div>
+            ) : (
+              <div className="product-grid">
+                {filteredProducts.map((product, index) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    showQuickView
+                    onQuickView={openQuickView}
+                    className="reveal-on-scroll"
+                    style={{ transitionDelay: `${(index % 4) * 0.1 + 0.1}s` }}
+                  />
+                ))}
+              </div>
+            )}
           </>
         )}
 
-        <div className="pagination reveal-on-scroll">
-          <button type="button" className="page-btn prev-btn">
-            <i className="fa-solid fa-chevron-left"></i>
-          </button>
-          <button type="button" className="page-num active">
-            1
-          </button>
-          <button type="button" className="page-num">
-            2
-          </button>
-          <button type="button" className="page-num">
-            3
-          </button>
-          <button type="button" className="page-btn next-btn">
-            <i className="fa-solid fa-chevron-right"></i>
-          </button>
-        </div>
+        {!googleLoading && !googleError && filteredProducts.length > 0 && (
+          <div className="pagination reveal-on-scroll">
+            <button type="button" className="page-btn prev-btn">
+              <i className="fa-solid fa-chevron-left"></i>
+            </button>
+            <button type="button" className="page-num active">
+              1
+            </button>
+            <button type="button" className="page-num">
+              2
+            </button>
+            <button type="button" className="page-num">
+              3
+            </button>
+            <button type="button" className="page-btn next-btn">
+              <i className="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        )}
       </section>
 
       <section className="bridal-section collections-bridal">
