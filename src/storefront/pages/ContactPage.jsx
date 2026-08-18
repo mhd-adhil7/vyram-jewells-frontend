@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const WHATSAPP_NUMBER = '9744342857';
+const WHATSAPP_NUMBER = '919605272671';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -33,7 +33,9 @@ const ContactPage = () => {
       formData.subject || 'General Inquiry'
     }\nMessage: ${formData.message}`;
 
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    const baseUrl = isMobile ? 'https://api.whatsapp.com/send' : 'https://web.whatsapp.com/send';
+    const whatsappUrl = `${baseUrl}?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`;
 
     setButtonText('Redirecting...');
     window.open(whatsappUrl, '_blank');

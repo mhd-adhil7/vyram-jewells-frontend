@@ -3695,3 +3695,68 @@ button:active, .btn:active, .btn-outline-rect:active, .add-cart-btn:active, .wis
     }
 }
 
+/* --- Mobile Fullscreen Image Lightbox --- */
+.mobile-lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9) !important;
+    z-index: 99999 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobile-lightbox-overlay.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.mobile-lightbox-content {
+    position: relative;
+    width: 90% !important;
+    height: 90% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0.9) !important;
+    transition: transform 0.3s ease;
+}
+
+.mobile-lightbox-overlay.active .mobile-lightbox-content {
+    transform: scale(1) !important;
+}
+
+.mobile-lightbox-img {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+}
+
+.mobile-lightbox-close {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 2rem !important;
+    cursor: pointer !important;
+    z-index: 100000 !important;
+    padding: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: transform 0.2s ease !important;
+}
+
+.mobile-lightbox-close:active {
+    transform: scale(0.85) !important;
+}
+
+

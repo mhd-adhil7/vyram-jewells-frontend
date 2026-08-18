@@ -4,6 +4,13 @@ import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 
+const normalizeCategory = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
 const categoryDescriptions = {
   'necklaces': 'Explore our exquisite handcrafted necklaces designed for timeless beauty.',
   'haram': 'Explore our traditional haram collections crafted with ultimate precision.',
@@ -37,11 +44,11 @@ const CategoryPage = () => {
 
   const isCategoryValid = useMemo(() => {
     if (googleLoading) return true;
-    return products.some((p) => p.categorySlug === categorySlug);
+    return products.some((p) => normalizeCategory(p.category) === normalizeCategory(categorySlug));
   }, [products, categorySlug, googleLoading]);
 
   const categoryLabel = useMemo(() => {
-    const matchedProduct = products.find((p) => p.categorySlug === categorySlug);
+    const matchedProduct = products.find((p) => normalizeCategory(p.category) === normalizeCategory(categorySlug));
     if (matchedProduct) {
       return matchedProduct.category;
     }
@@ -59,7 +66,7 @@ const CategoryPage = () => {
   }, [categorySlug, categoryLabel]);
 
   const categoryProducts = useMemo(() => {
-    return products.filter((product) => product.categorySlug === categorySlug);
+    return products.filter((product) => normalizeCategory(product.category) === normalizeCategory(categorySlug));
   }, [products, categorySlug]);
 
   if (!googleLoading && !isCategoryValid) {

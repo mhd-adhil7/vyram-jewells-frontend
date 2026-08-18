@@ -54,16 +54,10 @@ const Footer = () => {
               moments with timeless elegance.
             </p>
             <div className="footer-socials">
-              <a href="#" aria-label="Instagram">
+              <a href="https://www.instagram.com/vyram_jewells_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                 <i className="fa-brands fa-instagram"></i>
               </a>
-              <a href="#" aria-label="Facebook">
-                <i className="fa-brands fa-facebook"></i>
-              </a>
-              <a href="#" aria-label="Pinterest">
-                <i className="fa-brands fa-pinterest"></i>
-              </a>
-              <a href="#" aria-label="WhatsApp">
+              <a href="https://wa.me/919605272671" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
                 <i className="fa-brands fa-whatsapp"></i>
               </a>
             </div>
@@ -79,13 +73,13 @@ const Footer = () => {
                 <Link to="/collections">Trending Jewellery</Link>
               </li>
               <li>
-                <a href="#">Necklaces</a>
+                <Link to="/collections/necklaces">Necklaces</Link>
               </li>
               <li>
-                <a href="#">Earrings</a>
+                <Link to="/collections/earrings">Earrings</Link>
               </li>
               <li>
-                <a href="#">Bangles</a>
+                <Link to="/collections/bangles">Bangles</Link>
               </li>
             </ul>
           </div>
@@ -96,39 +90,23 @@ const Footer = () => {
               <li>
                 <Link to="/contact">Contact Us</Link>
               </li>
-              <li>
-                <a href="#">Order Tracking</a>
-              </li>
-              <li>
-                <a href="#">Shipping & Returns</a>
-              </li>
-              <li>
-                <a href="#">FAQ</a>
-              </li>
-              <li>
-                <a href="#">Care Guide</a>
-              </li>
             </ul>
           </div>
 
           <div className="footer-col">
-            <h3 className="col-heading">Store Info</h3>
+            <h3 className="col-heading">Contact Info</h3>
             <ul className="footer-info">
               <li>
-                <i className="fa-solid fa-location-dot"></i>
-                <span>123 Elegance Avenue, Luxury District, NY 10001</span>
-              </li>
-              <li>
                 <i className="fa-solid fa-phone"></i>
-                <span>+1 (800) 123-4567</span>
+                <a href="tel:+919605272671">9605272671</a>
               </li>
               <li>
-                <i className="fa-solid fa-envelope"></i>
-                <span>support@vyramjewells.com</span>
+                <i className="fa-brands fa-whatsapp"></i>
+                <a href="https://wa.me/919605272671" target="_blank" rel="noopener noreferrer">WhatsApp</a>
               </li>
               <li>
-                <i className="fa-regular fa-clock"></i>
-                <span>Mon - Sat: 10:00 AM - 8:00 PM</span>
+                <i className="fa-brands fa-instagram"></i>
+                <a href="https://www.instagram.com/vyram_jewells_/" target="_blank" rel="noopener noreferrer">Instagram</a>
               </li>
             </ul>
           </div>
@@ -140,11 +118,6 @@ const Footer = () => {
           <div className="bottom-bar-content">
             <p className="copyright">&copy; 2026 Vyram Jewells. All Rights Reserved.</p>
             <div className="bottom-links">
-              <a href="#">Privacy Policy</a>
-              <span className="divider">|</span>
-              <a href="#">Terms</a>
-              <span className="divider">|</span>
-              <a href="#">Sitemap</a>
             </div>
           </div>
         </div>

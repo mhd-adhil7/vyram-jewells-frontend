@@ -210,16 +210,13 @@ const StoreLayout = () => {
           <i className="fa-solid fa-cart-shopping"></i>
           <span className="cart-count">{cartCount}</span>
         </Link>
-        <a href="https://www.instagram.com" target="_blank" rel="noreferrer" className="social-icon" aria-label="Instagram">
+        <a href="https://www.instagram.com/vyram_jewells_/" target="_blank" rel="noreferrer" className="social-icon" aria-label="Instagram">
           <i className="fa-brands fa-instagram"></i>
         </a>
-        <a href="https://wa.me" target="_blank" rel="noreferrer" className="social-icon" aria-label="WhatsApp">
+        <a href="https://wa.me/919605272671" target="_blank" rel="noreferrer" className="social-icon" aria-label="WhatsApp">
           <i className="fa-brands fa-whatsapp"></i>
         </a>
-        <a href="https://www.facebook.com" target="_blank" rel="noreferrer" className="social-icon" aria-label="Facebook">
-          <i className="fa-brands fa-facebook"></i>
-        </a>
-        <a href="tel:+1234567890" className="social-icon" aria-label="Phone">
+        <a href="tel:+919605272671" className="social-icon" aria-label="Phone">
           <i className="fa-solid fa-phone"></i>
         </a>
       </div>

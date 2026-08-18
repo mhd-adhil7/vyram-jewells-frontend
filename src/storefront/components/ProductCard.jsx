@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { formatPrice } from '../data/catalog';
 import { useShop } from '../context/ShopContext';
+import MobileImageLightbox from './MobileImageLightbox';
 
 const ProductCard = ({ product, className = '', showQuickView = false, onQuickView, style }) => {
   const { addToCart, isWishlisted, toggleWishlist } = useShop();
   const [justAdded, setJustAdded] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
     if (!justAdded) {
@@ -37,7 +39,16 @@ const ProductCard = ({ product, className = '', showQuickView = false, onQuickVi
       data-category={product.category}
       style={style}
     >
-      <div className="product-image-container">
+      <div 
+        className="product-image-container"
+        onClick={(event) => {
+          if (window.innerWidth <= 600) {
+            event.preventDefault();
+            event.stopPropagation();
+            setIsLightboxOpen(true);
+          }
+        }}
+      >
         <img
           src={product.image}
           alt={product.name}
@@ -77,6 +88,11 @@ const ProductCard = ({ product, className = '', showQuickView = false, onQuickVi
           {justAdded ? 'Added!' : 'Add to Cart'}
         </button>
       </div>
+      <MobileImageLightbox
+        product={product}
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+      />
     </div>
   );
 };

@@ -5,6 +5,13 @@ import QuickViewModal from '../components/QuickViewModal';
 import { bridalCollections } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 
+const normalizeCategory = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
 const CollectionsPage = () => {
   const { products, googleLoading, googleError, fetchNecklaces } = useProductCatalog();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -61,8 +68,12 @@ const CollectionsPage = () => {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      if (activeFilter !== 'all' && product.categorySlug !== activeFilter) {
-        return false;
+      if (activeFilter !== 'all') {
+        const normProductCat = normalizeCategory(product.category);
+        const normActiveFilter = normalizeCategory(activeFilter);
+        if (normProductCat !== normActiveFilter) {
+          return false;
+        }
       }
 
       if (!searchTerm) {
@@ -177,7 +188,7 @@ const CollectionsPage = () => {
             {filteredProducts.length === 0 ? (
               <div className="no-results-container reveal-on-scroll" style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: 'var(--color-white)', borderRadius: '20px', boxShadow: '0 10px 30px rgba(116, 139, 111, 0.03)', maxWidth: '500px', margin: '40px auto' }}>
                 <p className="no-results-msg" style={{ fontFamily: 'var(--font-body)', fontSize: '1.25rem', color: 'var(--color-text-sub)', marginBottom: '15px' }}>
-                  No products found
+                  {activeFilter !== 'all' ? 'No products found in this category' : 'No products found'}
                 </p>
                 <button 
                   type="button" 

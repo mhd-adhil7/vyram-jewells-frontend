@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '../data/catalog';
 import { useShop } from '../context/ShopContext';
 
-const WHATSAPP_NUMBER = '9744342857';
+const WHATSAPP_NUMBER = '919605272671';
 
 const CartPage = () => {
   const { cartCount, cartItems, cartSubtotal, removeFromCart, setCartQuantity } = useShop();
@@ -23,18 +23,20 @@ const CartPage = () => {
     }
 
     const itemLines = cartItems
-      .map((item) => {
-        return `Product: ${item.product.name}\nQuantity: ${item.quantity}\nPrice: ${formatPrice(
+      .map((item, index) => {
+        return `${index + 1}. ${item.product.name}\n   Quantity: ${item.quantity}\n   Price: ${formatPrice(
           item.product.price
         )}`;
       })
       .join('\n\n');
 
-    const message = `Hello, I would like to order the following jewellery items:\n\n${itemLines}\n\nTotal: ${formatPrice(
+    const message = `Hello Vyram Jewells,\n\nI would like to place an order:\n\n${itemLines}\n\nTotal: ${formatPrice(
       cartSubtotal
-    )}\n\nPlease assist me with the order.`;
+    )}\n\nPlease confirm the order and availability.`;
 
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    const baseUrl = isMobile ? 'https://api.whatsapp.com/send' : 'https://web.whatsapp.com/send';
+    const whatsappUrl = `${baseUrl}?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -140,7 +142,7 @@ const CartPage = () => {
               className="cart-checkout-btn"
               onClick={handleCheckout}
             >
-              Checkout
+              Proceed to Checkout
             </button>
           </div>
         )}
