@@ -3191,6 +3191,10 @@ button:active, .btn:active, .btn-outline-rect:active, .add-cart-btn:active, .wis
     scroll-snap-stop: always;
 }
 
+.mobile-carousel-indicator-bar {
+    display: none;
+}
+
 .carousel-arrow {
     position: absolute;
     top: 40%;
@@ -3502,15 +3506,43 @@ button:active, .btn:active, .btn-outline-rect:active, .add-cart-btn:active, .wis
     .new-arrivals-carousel-container {
         padding: 0;
     }
+    .new-arrivals-carousel {
+        gap: 12px !important;
+        margin-bottom: 20px !important;
+        padding-bottom: 15px !important;
+        scroll-snap-type: x mandatory !important;
+    }
     .new-arrivals-carousel .new-arrival-item {
-        flex: 0 0 100%;
-        scroll-snap-align: center;
+        flex: 0 0 calc(50% - 6px) !important;
+        scroll-snap-align: start !important;
+        scroll-snap-stop: always !important;
     }
     .carousel-arrow {
         display: none; /* Hide arrows on mobile, prioritize swipe */
     }
     .product-image-container {
         height: 360px;
+    }
+    
+    /* Mobile scroll progress indicator styles */
+    .mobile-carousel-indicator-bar {
+        display: block;
+        width: 80px;
+        height: 3px;
+        background-color: rgba(116, 139, 111, 0.2);
+        margin: 10px auto 30px auto;
+        border-radius: 2px;
+        position: relative;
+        overflow: hidden;
+    }
+    .mobile-carousel-indicator-progress {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background-color: var(--color-primary-dark);
+        border-radius: 2px;
+        transition: left 0.1s ease-out, width 0.1s ease-out;
     }
 }
 

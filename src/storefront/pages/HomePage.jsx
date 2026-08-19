@@ -5,6 +5,21 @@ import QuickViewModal from '../components/QuickViewModal';
 import { bridalCollections } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 import image from '../../assets/vyramheroimgae.jpeg';
+import banglesImg from '../../assets/bangles.jpg';
+import earingImg from '../../assets/earing.jpg';
+import haramImg from '../../assets/haram.jpg';
+import bridalHeroImg from '../../assets/bridal-hero.jpg';
+
+const collectionImages = {
+  'necklaces': image,
+  'bangles': banglesImg,
+  'hair-accessories': bridalHeroImg,
+  'haram': haramImg,
+  'earrings': earingImg,
+  'rings': banglesImg,
+  'tikkas': bridalHeroImg
+};
+
 const HomePage = () => {
   const { products } = useProductCatalog();
   
@@ -32,6 +47,8 @@ const HomePage = () => {
 
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [scrollRatio, setScrollRatio] = useState(0);
+  const [thumbWidth, setThumbWidth] = useState(0);
 
   const openQuickView = (product) => {
     setQuickViewProduct(product);
@@ -60,37 +77,34 @@ const HomePage = () => {
     const carousel = carouselRef.current;
     if (!carousel) return;
 
-    let intervalId;
-
-    const startAutoScroll = () => {
-      intervalId = setInterval(() => {
-        if (carousel && carousel.firstElementChild) {
-          const cardWidth = carousel.firstElementChild.offsetWidth;
-          const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
-
-          if (carousel.scrollLeft >= maxScrollLeft - 10) {
-            carousel.scrollTo({ left: 0, behavior: 'smooth' });
-          } else {
-            carousel.scrollBy({ left: cardWidth + 30, behavior: 'smooth' });
-          }
-        }
-      }, 4000);
+    const updateScroll = () => {
+      const { scrollWidth, clientWidth, scrollLeft } = carousel;
+      if (scrollWidth > clientWidth) {
+        const widthPercent = (clientWidth / scrollWidth) * 100;
+        const maxScroll = scrollWidth - clientWidth;
+        const leftPercent = (scrollLeft / maxScroll) * (100 - widthPercent);
+        setThumbWidth(widthPercent);
+        setScrollRatio(leftPercent);
+      } else {
+        setThumbWidth(0);
+        setScrollRatio(0);
+      }
     };
 
-    startAutoScroll();
+    updateScroll();
 
-    const handleMouseEnter = () => clearInterval(intervalId);
-    const handleMouseLeave = () => startAutoScroll();
+    carousel.addEventListener('scroll', updateScroll, { passive: true });
+    window.addEventListener('resize', updateScroll);
 
-    carousel.addEventListener('mouseenter', handleMouseEnter);
-    carousel.addEventListener('mouseleave', handleMouseLeave);
+    const resizeObserver = new ResizeObserver(updateScroll);
+    resizeObserver.observe(carousel);
 
     return () => {
-      clearInterval(intervalId);
-      carousel.removeEventListener('mouseenter', handleMouseEnter);
-      carousel.removeEventListener('mouseleave', handleMouseLeave);
+      carousel.removeEventListener('scroll', updateScroll);
+      window.removeEventListener('resize', updateScroll);
+      resizeObserver.disconnect();
     };
-  }, []);
+  }, [products]);
 
   return (
     <>
@@ -170,7 +184,7 @@ const HomePage = () => {
               >
                 <div className="circle-outline">
                   <img
-                    src={`/assets/cat-${cat.slug}.png`}
+                    src={collectionImages[cat.slug] || `/assets/cat-${cat.slug}.png`}
                     alt={cat.label}
                     onError={(e) => {
                       e.target.src = '/assets/product-default.png';
@@ -221,6 +235,18 @@ const HomePage = () => {
               <i className="fa-solid fa-chevron-right"></i>
             </button>
           </div>
+
+          {thumbWidth > 0 && thumbWidth < 100 && (
+            <div className="mobile-carousel-indicator-bar">
+              <div 
+                className="mobile-carousel-indicator-progress" 
+                style={{ 
+                  width: `${thumbWidth}%`,
+                  left: `${scrollRatio}%`
+                }}
+              />
+            </div>
+          )}
         </div>
       </section>
 

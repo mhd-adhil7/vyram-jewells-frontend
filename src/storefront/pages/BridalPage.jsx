@@ -4,14 +4,17 @@ import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
 import { bridalCollections } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
+import bridalHero from '../../assets/bridal-hero.jpg';
+
 
 const bridalCategories = [
-  'Bridal Necklace Sets',
-  'Temple Bridal',
-  'Traditional Gold',
-  'Diamond Bridal',
-  'Kerala Edit'
+  'Kerala Bridal Collection',
+  'Antique Bridal Collection',
+  'Trending Bridal Collection',
+  'Budget Friendly Collection',
+  'Premium Sets Collection'
 ];
+
 
 const BridalPage = () => {
   const { products } = useProductCatalog();
@@ -55,7 +58,7 @@ const BridalPage = () => {
           </div>
         </div>
         <div className="bridal-page-hero-image">
-          <img src="/assets/bridal-default.png" alt="Bridal Jewellery" />
+          <img src={bridalHero} alt="Bridal Jewellery" />
         </div>
       </section>
 
