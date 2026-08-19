@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
@@ -30,14 +30,14 @@ const BridalPage = () => {
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-  const openQuickView = (product) => {
+  const openQuickView = useCallback((product) => {
     setQuickViewProduct(product);
     setIsQuickViewOpen(true);
-  };
+  }, []);
 
-  const closeQuickView = () => {
+  const closeQuickView = useCallback(() => {
     setIsQuickViewOpen(false);
-  };
+  }, []);
 
   return (
     <>

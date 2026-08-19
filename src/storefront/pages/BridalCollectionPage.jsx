@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
@@ -13,16 +13,14 @@ const BridalCollectionPage = () => {
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-  const openQuickView = (product) => {
-    console.log('DEBUG: openQuickView called for product:', product);
+  const openQuickView = useCallback((product) => {
     setQuickViewProduct(product);
     setIsQuickViewOpen(true);
-  };
+  }, []);
 
-  const closeQuickView = () => {
-    console.log('DEBUG: closeQuickView called');
+  const closeQuickView = useCallback(() => {
     setIsQuickViewOpen(false);
-  };
+  }, []);
 
   const products = useMemo(() => {
     if (!collection) return [];

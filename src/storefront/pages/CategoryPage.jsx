@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
@@ -33,14 +33,14 @@ const CategoryPage = () => {
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-  const openQuickView = (product) => {
+  const openQuickView = useCallback((product) => {
     setQuickViewProduct(product);
     setIsQuickViewOpen(true);
-  };
+  }, []);
 
-  const closeQuickView = () => {
+  const closeQuickView = useCallback(() => {
     setIsQuickViewOpen(false);
-  };
+  }, []);
 
   const isCategoryValid = useMemo(() => {
     if (googleLoading) return true;
@@ -96,7 +96,7 @@ const CategoryPage = () => {
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '1.1rem', color: 'var(--color-text-sub)', marginBottom: '35px' }}>
           We were unable to load the collection. Please check your connection and try again.
         </p>
-        <button onClick={fetchNecklaces} className="btn btn-primary explore-btn" style={{ cursor: 'pointer', border: 'none' }}>
+        <button onClick={() => fetchNecklaces(true)} className="btn btn-primary explore-btn" style={{ cursor: 'pointer', border: 'none' }}>
           Retry Connection
         </button>
       </div>

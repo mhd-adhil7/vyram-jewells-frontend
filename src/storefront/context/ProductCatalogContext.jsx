@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { categoryLabels, defaultProductImage, products as seedProducts } from '../data/catalog';
+import { categoryLabels, defaultProductImage } from '../data/catalog';
 
 const PRODUCTS_STORAGE_KEY = 'vyram_products';
 const PRODUCT_CATEGORY_KEYS = Object.keys(categoryLabels).filter((key) => key !== 'all');
@@ -182,34 +182,7 @@ const uniqueProducts = (products) => {
   });
 };
 
-const _seedCatalogProducts = uniqueProducts(
-  seedProducts
-    .map((product) => normalizeStoredProduct({ ...product, stock: product.stock ?? DEFAULT_STOCK }))
-    .filter(Boolean)
-);
 
-const _readStoredProducts = () => {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  try {
-    const raw = window.localStorage.getItem(PRODUCTS_STORAGE_KEY);
-    if (!raw) {
-      return null;
-    }
-
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return null;
-    }
-
-    const normalized = uniqueProducts(parsed.map(normalizeStoredProduct).filter(Boolean));
-    return normalized.length > 0 ? normalized : null;
-  } catch {
-    return null;
-  }
-};
 
 const parseCSV = (csvText) => {
   const lines = [];
@@ -387,13 +360,6 @@ const parseProductsFromCSV = (csvText) => {
     }
   }
 
-  if (productsList.length > 0) {
-    console.log("DEBUG: Logging first 5 parsed products:");
-    productsList.slice(0, 5).forEach((p, idx) => {
-      console.log(`[Product ${idx + 1}] Name: ${p.name} | Category: ${p.category} | search_keywords: ${p.search_keywords}`);
-    });
-  }
-
   return productsList;
 };
 
@@ -402,7 +368,24 @@ export const ProductCatalogProvider = ({ children }) => {
   const [googleLoading, setGoogleLoading] = useState(true);
   const [googleError, setGoogleError] = useState(null);
 
-  const fetchNecklaces = useCallback(async () => {
+  const fetchNecklaces = useCallback(async (force = false) => {
+    if (!force) {
+      try {
+        const cached = sessionStorage.getItem('vyram_catalog_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setGoogleProducts(parsed);
+            setGoogleLoading(false);
+            setGoogleError(null);
+            return;
+          }
+        }
+      } catch (cacheErr) {
+        // Fallback silently
+      }
+    }
+
     setGoogleLoading(true);
     setGoogleError(null);
     try {
@@ -413,11 +396,14 @@ export const ProductCatalogProvider = ({ children }) => {
         throw new Error(`Failed to fetch product data (HTTP status ${response.status})`);
       }
       const csvText = await response.text();
-      console.log('Raw CSV response:', csvText);
       const parsed = parseProductsFromCSV(csvText);
-      console.log('Parsed product data:', parsed);
       setGoogleProducts(parsed);
       setGoogleLoading(false);
+      try {
+        sessionStorage.setItem('vyram_catalog_cache', JSON.stringify(parsed));
+      } catch (cacheErr) {
+        // Fallback silently
+      }
     } catch (err) {
       console.error('Error fetching products from Google Sheets:', err);
       setGoogleError(err.message || 'Failed to fetch products');
@@ -426,7 +412,7 @@ export const ProductCatalogProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    fetchNecklaces();
+    fetchNecklaces(false);
   }, [fetchNecklaces]);
 
   const products = useMemo(() => {

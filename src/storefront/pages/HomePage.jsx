@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
@@ -50,28 +50,28 @@ const HomePage = () => {
   const [scrollRatio, setScrollRatio] = useState(0);
   const [thumbWidth, setThumbWidth] = useState(0);
 
-  const openQuickView = (product) => {
+  const openQuickView = useCallback((product) => {
     setQuickViewProduct(product);
     setIsQuickViewOpen(true);
-  };
+  }, []);
 
-  const closeQuickView = () => {
+  const closeQuickView = useCallback(() => {
     setIsQuickViewOpen(false);
-  };
+  }, []);
 
-  const scrollLeft = () => {
+  const scrollLeft = useCallback(() => {
     if (carouselRef.current) {
       const cardWidth = carouselRef.current.firstElementChild?.offsetWidth || 0;
       carouselRef.current.scrollBy({ left: -(cardWidth + 30), behavior: 'smooth' });
     }
-  };
+  }, []);
 
-  const scrollRight = () => {
+  const scrollRight = useCallback(() => {
     if (carouselRef.current) {
       const cardWidth = carouselRef.current.firstElementChild?.offsetWidth || 0;
       carouselRef.current.scrollBy({ left: cardWidth + 30, behavior: 'smooth' });
     }
-  };
+  }, []);
 
   useEffect(() => {
     const carousel = carouselRef.current;

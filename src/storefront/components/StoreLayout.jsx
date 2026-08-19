@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Footer from './Footer';
 import { useShop } from '../context/ShopContext';
@@ -49,7 +49,7 @@ const StoreLayout = () => {
     };
   }, [location.pathname, location.search, products]);
 
-  const handleSearchSubmit = (event) => {
+  const handleSearchSubmit = useCallback((event) => {
     event.preventDefault();
     const query = searchTerm.trim();
     setMobileMenuOpen(false);
@@ -60,7 +60,7 @@ const StoreLayout = () => {
     }
 
     navigate('/collections');
-  };
+  }, [searchTerm, navigate]);
 
   return (
     <>

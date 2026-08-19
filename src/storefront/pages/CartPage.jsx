@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '../data/catalog';
 import { useShop } from '../context/ShopContext';
@@ -8,15 +9,15 @@ const CartPage = () => {
   const { cartCount, cartItems, cartSubtotal, removeFromCart, setCartQuantity } = useShop();
   const navigate = useNavigate();
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (window.history.state && window.history.state.idx > 0) {
       navigate(-1);
     } else {
       navigate('/collections');
     }
-  };
+  }, [navigate]);
 
-  const handleCheckout = () => {
+  const handleCheckout = useCallback(() => {
     if (cartCount === 0) {
       window.alert('Your cart is empty. Please add items before checking out.');
       return;
@@ -38,7 +39,7 @@ const CartPage = () => {
     const baseUrl = isMobile ? 'https://api.whatsapp.com/send' : 'https://web.whatsapp.com/send';
     const whatsappUrl = `${baseUrl}?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
-  };
+  }, [cartCount, cartItems, cartSubtotal]);
 
   return (
     <div className="cart-page-overlay" onClick={handleClose}>
@@ -84,6 +85,7 @@ const CartPage = () => {
                     <img
                       src={item.product.image}
                       alt={item.product.name}
+                      loading="lazy"
                       onError={(e) => {
                         e.target.src = '/assets/product-default.png';
                       }}

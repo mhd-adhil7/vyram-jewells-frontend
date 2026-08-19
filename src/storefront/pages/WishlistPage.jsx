@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
@@ -19,19 +19,19 @@ const WishlistPage = () => {
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-  const openQuickView = (product) => {
+  const openQuickView = useCallback((product) => {
     setQuickViewProduct(product);
     setIsQuickViewOpen(true);
-  };
+  }, []);
 
-  const closeQuickView = () => {
+  const closeQuickView = useCallback(() => {
     setIsQuickViewOpen(false);
-  };
+  }, []);
 
-  const handleMoveToCart = (productId) => {
+  const handleMoveToCart = useCallback((productId) => {
     addToCart(productId);
     removeFromWishlist(productId);
-  };
+  }, [addToCart, removeFromWishlist]);
 
   return (
     <main className="wishlist-page">
@@ -57,6 +57,7 @@ const WishlistPage = () => {
                     <img
                       src={product.image}
                       alt={product.name}
+                      loading="lazy"
                       onError={(e) => {
                         e.target.src = '/assets/product-default.png';
                       }}

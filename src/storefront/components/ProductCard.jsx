@@ -52,6 +52,7 @@ const ProductCard = ({ product, className = '', showQuickView = false, onQuickVi
         <img
           src={product.image}
           alt={product.name}
+          loading="lazy"
           onError={(e) => {
             e.target.src = '/assets/product-default.png';
           }}

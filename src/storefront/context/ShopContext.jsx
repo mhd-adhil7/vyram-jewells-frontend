@@ -1,5 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { wishlistDefaultIds } from '../data/catalog';
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { useProductCatalog } from './ProductCatalogContext';
 
 const CART_STORAGE_KEY = 'vyram_cart';
@@ -100,10 +99,7 @@ const ShopContext = createContext(null);
 export const ShopProvider = ({ children }) => {
   const { productsById, googleLoading } = useProductCatalog();
 
-  const _defaultWishlistIds = useMemo(
-    () => wishlistDefaultIds.filter((id) => Boolean(productsById[id])),
-    [productsById]
-  );
+
 
   const nameToId = useMemo(
     () => new Map(Object.values(productsById).map((product) => [product.name.toLowerCase(), product.id])),
@@ -174,7 +170,7 @@ export const ShopProvider = ({ children }) => {
     [cartItems]
   );
 
-  const addToCart = (productId, quantity = 1) => {
+  const addToCart = useCallback((productId, quantity = 1) => {
     if (!productsById[productId]) {
       return;
     }
@@ -197,9 +193,9 @@ export const ShopProvider = ({ children }) => {
 
       return [...prevCart, { id: productId, quantity: nextQuantity }];
     });
-  };
+  }, [productsById]);
 
-  const setCartQuantity = (productId, quantity) => {
+  const setCartQuantity = useCallback((productId, quantity) => {
     if (!productsById[productId]) {
       return;
     }
@@ -220,17 +216,17 @@ export const ShopProvider = ({ children }) => {
           : entry
       )
     );
-  };
+  }, [productsById]);
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = useCallback((productId) => {
     setCart((prevCart) => prevCart.filter((entry) => entry.id !== productId));
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
-  };
+  }, []);
 
-  const toggleWishlist = (productId) => {
+  const toggleWishlist = useCallback((productId) => {
     if (!productsById[productId]) {
       return;
     }
@@ -242,28 +238,43 @@ export const ShopProvider = ({ children }) => {
 
       return [...prevWishlist, productId];
     });
-  };
+  }, [productsById]);
 
-  const removeFromWishlist = (productId) => {
+  const removeFromWishlist = useCallback((productId) => {
     setWishlist((prevWishlist) => prevWishlist.filter((id) => id !== productId));
-  };
+  }, []);
 
-  const isWishlisted = (productId) => wishlist.includes(productId);
+  const isWishlisted = useCallback((productId) => wishlist.includes(productId), [wishlist]);
 
-  const value = {
-    cartItems,
-    cartCount,
-    cartSubtotal,
-    wishlistItems,
-    wishlistCount: wishlistItems.length,
-    addToCart,
-    setCartQuantity,
-    removeFromCart,
-    clearCart,
-    toggleWishlist,
-    removeFromWishlist,
-    isWishlisted
-  };
+  const value = useMemo(
+    () => ({
+      cartItems,
+      cartCount,
+      cartSubtotal,
+      wishlistItems,
+      wishlistCount: wishlistItems.length,
+      addToCart,
+      setCartQuantity,
+      removeFromCart,
+      clearCart,
+      toggleWishlist,
+      removeFromWishlist,
+      isWishlisted
+    }),
+    [
+      cartItems,
+      cartCount,
+      cartSubtotal,
+      wishlistItems,
+      addToCart,
+      setCartQuantity,
+      removeFromCart,
+      clearCart,
+      toggleWishlist,
+      removeFromWishlist,
+      isWishlisted
+    ]
+  );
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
 };
