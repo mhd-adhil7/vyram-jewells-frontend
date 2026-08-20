@@ -9,6 +9,19 @@ import banglesImg from '../../assets/bangles.jpg';
 import earingImg from '../../assets/earing.jpg';
 import haramImg from '../../assets/haram.jpg';
 import bridalHeroImg from '../../assets/bridal-hero.jpg';
+import keralaBridalImg from '../../assets/bridal/Kerala bridal.jpg';
+import antiqueBrideImg from '../../assets/bridal/Antique bride.jpg';
+import trendingImg from '../../assets/bridal/Trending.jpg';
+import budgetFriendlyImg from '../../assets/bridal/Budget friendly.jpg';
+import premiumSetsImg from '../../assets/bridal/Premium sets.jpg';
+
+const bridalCategories = [
+  { name: 'Kerala Bridal Collection', image: keralaBridalImg, slug: 'kerala' },
+  { name: 'Antique Bridal Collection', image: antiqueBrideImg, slug: 'antique' },
+  { name: 'Trending Bridal Collection', image: trendingImg, slug: 'trending' },
+  { name: 'Budget Friendly Collection', image: budgetFriendlyImg, slug: 'budget' },
+  { name: 'Premium Sets Collection', image: premiumSetsImg, slug: 'premium' }
+];
 
 const collectionImages = {
   'necklaces': image,
@@ -197,10 +210,36 @@ const HomePage = () => {
           })}
         </div>
 
-        <div className="section-btn">
-          <Link to="/collections" className="btn-outline-rect page-transition-link">
-            Explore More
-          </Link>
+
+      </section>
+
+      <section className="collections-section" style={{ paddingTop: '20px', paddingBottom: '20px' }}>
+        <div className="section-title">
+          <h2>BRIDAL COLLECTIONS</h2>
+          <div className="title-line">
+            <span></span>
+          </div>
+        </div>
+
+        <div className="collections-grid">
+          {bridalCategories.map((cat, index) => {
+            return (
+              <Link
+                key={cat.slug}
+                to={`/bridal?collection=${cat.slug}`}
+                className="collection-item reveal-on-scroll page-transition-link"
+                style={{ textDecoration: 'none', transitionDelay: `${(index + 1) * 0.1}s` }}
+              >
+                <div className="circle-outline">
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                  />
+                </div>
+                <h3>{cat.name.toUpperCase()}</h3>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
