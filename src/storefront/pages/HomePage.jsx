@@ -226,7 +226,7 @@ const HomePage = () => {
             return (
               <Link
                 key={cat.slug}
-                to={`/bridal?collection=${cat.slug}`}
+                to={`/collections/bridal?collection=${cat.slug}`}
                 className="collection-item reveal-on-scroll page-transition-link"
                 style={{ textDecoration: 'none', transitionDelay: `${(index + 1) * 0.1}s` }}
               >
@@ -297,7 +297,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className="bridal-grid">
+        <div className="bridal-grid three-cols">
           {bridalCollections.map((collection, index) => (
             <Link
               key={collection.slug}
@@ -307,7 +307,7 @@ const HomePage = () => {
             >
               <div className="arch-outline">
                 <div className="arch-img">
-                  <img src="/assets/bridal-default.png" alt={collection.title} />
+                  <img src={collection.image} alt={collection.title} />
                   <div className="overlay-text">{collection.title.toUpperCase()}</div>
                 </div>
               </div>

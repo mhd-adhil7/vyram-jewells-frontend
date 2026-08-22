@@ -67,7 +67,7 @@ const Footer = () => {
             <h3 className="col-heading">Collections</h3>
             <ul className="footer-links">
               <li>
-                <Link to="/bridal">Bridal Collection</Link>
+                <Link to="/collections/bridal">Bridal Collection</Link>
               </li>
               <li>
                 <Link to="/collections">Trending Jewellery</Link>

@@ -1,8 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
 import { useProductCatalog } from '../context/ProductCatalogContext';
+import { categoryLabels } from '../data/catalog';
 
 const normalizeCategory = (value) =>
   String(value || "")
@@ -29,6 +30,8 @@ const categoryDescriptions = {
 const CategoryPage = () => {
   const { products, googleLoading, googleError, fetchNecklaces } = useProductCatalog();
   const { categorySlug } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCollection = searchParams.get('collection') || 'all';
 
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -44,7 +47,12 @@ const CategoryPage = () => {
 
   const isCategoryValid = useMemo(() => {
     if (googleLoading) return true;
-    return products.some((p) => normalizeCategory(p.category) === normalizeCategory(categorySlug));
+    const lowerSlug = categorySlug.toLowerCase();
+    const standardKeys = Object.keys(categoryLabels).map(k => k.toLowerCase());
+    return (
+      standardKeys.includes(lowerSlug) ||
+      products.some((p) => normalizeCategory(p.category) === normalizeCategory(categorySlug))
+    );
   }, [products, categorySlug, googleLoading]);
 
   const categoryLabel = useMemo(() => {
@@ -68,6 +76,26 @@ const CategoryPage = () => {
   const categoryProducts = useMemo(() => {
     return products.filter((product) => normalizeCategory(product.category) === normalizeCategory(categorySlug));
   }, [products, categorySlug]);
+
+  const filteredProducts = useMemo(() => {
+    if (categorySlug !== 'bridal') return categoryProducts;
+    if (selectedCollection === 'all') return categoryProducts;
+
+    const collectionMapping = {
+      'kerala': 'Kerala Bridal Collection',
+      'antique': 'Antique Bridal Collection',
+      'trending': 'Trending Bridal Collection',
+      'budget': 'Budget Friendly Collection',
+      'premium': 'Premium Sets Collection'
+    };
+
+    const targetCollection = collectionMapping[selectedCollection] || '';
+    if (!targetCollection) return categoryProducts;
+
+    return categoryProducts.filter(
+      (p) => p.collection && p.collection.trim().toLowerCase() === targetCollection.toLowerCase()
+    );
+  }, [categoryProducts, categorySlug, selectedCollection]);
 
   if (!googleLoading && !isCategoryValid) {
     return <Navigate to="/collections" replace />;
@@ -101,10 +129,10 @@ const CategoryPage = () => {
         </button>
       </div>
     );
-  } else if (categoryProducts.length > 0) {
+  } else if (filteredProducts.length > 0) {
     pageContent = (
       <div className="product-grid">
-        {categoryProducts.map((product, index) => (
+        {filteredProducts.map((product, index) => (
           <ProductCard
             key={product.id}
             product={product}
@@ -155,6 +183,27 @@ const CategoryPage = () => {
       </section>
 
       <section className="main-collections" style={{ padding: '60px 5%' }}>
+        {categorySlug === 'bridal' && (
+          <div className="new-arrivals-filters" style={{ marginBottom: '40px', justifyContent: 'center' }}>
+            {[
+              { slug: 'all', name: 'All' },
+              { slug: 'kerala', name: 'Kerala Bridal' },
+              { slug: 'antique', name: 'Antique Bridal' },
+              { slug: 'trending', name: 'Trending Bridal' },
+              { slug: 'budget', name: 'Budget Friendly' },
+              { slug: 'premium', name: 'Premium Sets' }
+            ].map((item) => (
+              <button
+                key={item.slug}
+                className={`filter-pill ${selectedCollection === item.slug ? 'active' : ''}`}
+                onClick={() => setSearchParams({ collection: item.slug })}
+                style={{ cursor: 'pointer' }}
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
+        )}
         {pageContent}
       </section>
 

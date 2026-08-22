@@ -1,3 +1,7 @@
+import keralaBridalImg from '../../assets/bridal/Kerala bridal.jpg';
+import antiqueBrideImg from '../../assets/bridal/Antique bride.jpg';
+import trendingImg from '../../assets/bridal/Trending.jpg';
+
 export const defaultProductImage = '/assets/product-default.png';
 
 export const getProductImage = (category) => {
@@ -230,28 +234,22 @@ export const bridalFavoriteIds = [
 
 export const bridalCollections = [
   {
-    slug: 'kerala',
-    title: 'Kerala Bridal Edit',
-    description: "Embody the rich heritage of God's Own Country with our exclusive Kerala-style bridal pieces.",
-    productIds: ['palakka-mala', 'kasavu-inspired-bangles', 'nagapada-thali', 'manga-mala-set']
+    slug: 'malayali-manga',
+    title: 'Malayali Manga',
+    image: keralaBridalImg,
+    description: "Show only traditional Kerala bridal looks, Kerala saree styles, traditional gold jewellery, and authentic Kerala bridal photography."
   },
   {
-    slug: 'royal-temple',
-    title: 'Royal Temple Collection',
-    description: 'Divine craftsmanship adorned with intricate motifs, perfect for a majestic wedding look.',
-    productIds: ['lakshmi-motif-choker', 'intricate-temple-bangles', 'peacock-design-vanki', 'divine-jhumkas']
+    slug: 'premium-bridal-bloom',
+    title: 'Premium Bridal Bloom',
+    image: antiqueBrideImg,
+    description: "Show only antique jewellery bridal looks, temple jewellery, heritage-inspired styling, traditional antique designs, and vintage luxury bridal photography."
   },
   {
-    slug: 'classic-gold',
-    title: 'Classic Gold Bridal',
-    description: 'Timeless gold pieces honoring tradition, crafted for the contemporary bride.',
-    productIds: ['heritage-gold-choker', 'heavy-antique-haar', 'bridal-maang-tikka', 'statement-gold-kada']
-  },
-  {
-    slug: 'diamond',
-    title: 'Diamond Wedding Collection',
-    description: 'Sparkle eternally with brilliant, conflict-free diamond masterpieces.',
-    productIds: ['diamond-solitaire-set', 'eternity-diamond-bangles', 'brilliant-cut-drops', 'platinum-diamond-ring']
+    slug: 'bridal-vogue',
+    title: 'Bridal Vogue',
+    image: trendingImg,
+    description: "Show only modern bridal looks, premium wedding jewellery, elegant bridal styling, and contemporary luxury bridal photography."
   }
 ];
 

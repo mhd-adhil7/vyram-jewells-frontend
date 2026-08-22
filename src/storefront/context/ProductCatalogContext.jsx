@@ -50,7 +50,7 @@ const normalizeStock = (value, fallback = DEFAULT_STOCK) => {
 const transformUploadcareUrl = (url) => {
   if (!url) return url;
   
-  const regex = /^(https?:\/\/[a-z0-9.-]+\.(?:ucarecd\.net|ucarecdn\.com)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/([^\/]+))?$/i;
+  const regex = new RegExp("^(https?:\\/\\/[a-z0-9.-]+\\.(?:ucarecd\\.net|ucarecdn\\.com)\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\\/([^/]+))?$", "i");
   const match = url.match(regex);
   
   if (match) {
@@ -146,42 +146,6 @@ const validateUpdateInput = (raw) => {
     stock
   };
 };
-
-const normalizeStoredProduct = (raw) => {
-  const id = normalizeId(raw?.id);
-  const name = normalizeName(raw?.name);
-  const category = normalizeCategory(raw?.category);
-  const price = normalizePrice(raw?.price);
-
-  if (!id || !name || !category || price === null || price <= 0) {
-    return null;
-  }
-
-  return {
-    id,
-    name,
-    category,
-    categorySlug: raw?.categorySlug || slugifyCategory(category),
-    searchKeywords: raw?.searchKeywords || raw?.search_keywords || '',
-    price,
-    image: normalizeImage(raw?.image),
-    stock: normalizeStock(raw?.stock)
-  };
-};
-
-const uniqueProducts = (products) => {
-  const seen = new Set();
-
-  return products.filter((product) => {
-    if (!product || seen.has(product.id)) {
-      return false;
-    }
-
-    seen.add(product.id);
-    return true;
-  });
-};
-
 
 
 const parseCSV = (csvText) => {
@@ -304,6 +268,7 @@ const parseProductsFromCSV = (csvText) => {
   const keywordsIdx = headers.findIndex(h => h === 'search_keywords' || h === 'search keywords' || h === 'keywords');
   const priceIdx = headers.indexOf('price');
   const imageIdx = headers.indexOf('image');
+  const collectionIdx = headers.indexOf('collection');
 
   const productsList = [];
 
@@ -321,6 +286,7 @@ const parseProductsFromCSV = (csvText) => {
 
       const categoryVal = row[categoryIdx]?.trim() || '';
       const imageVal = row[imageIdx]?.trim() || '';
+      const collectionVal = collectionIdx !== -1 ? row[collectionIdx]?.trim() || '' : '';
 
       let nameVal = nameIdx !== -1 ? row[nameIdx]?.trim() : '';
       if (!nameVal) {
@@ -349,6 +315,7 @@ const parseProductsFromCSV = (csvText) => {
         price: priceVal,
         category: categoryVal,
         categorySlug: slugifyCategory(categoryVal),
+        collection: collectionVal,
         search_keywords: keywordsVal,
         image: normalizeImage(imageVal),
         stock: 10
@@ -381,7 +348,7 @@ export const ProductCatalogProvider = ({ children }) => {
             return;
           }
         }
-      } catch (cacheErr) {
+      } catch {
         // Fallback silently
       }
     }
@@ -401,7 +368,7 @@ export const ProductCatalogProvider = ({ children }) => {
       setGoogleLoading(false);
       try {
         sessionStorage.setItem('vyram_catalog_cache', JSON.stringify(parsed));
-      } catch (cacheErr) {
+      } catch {
         // Fallback silently
       }
     } catch (err) {
