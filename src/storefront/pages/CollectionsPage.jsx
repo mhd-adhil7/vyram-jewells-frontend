@@ -7,16 +7,23 @@ import banglesImg from '../../assets/bangles.jpg';
 import earingImg from '../../assets/earing.jpg';
 import haramImg from '../../assets/haram.jpg';
 import bridalHeroImg from '../../assets/bridal-hero.jpg';
-import necklacesImg from '../../assets/vyramheroimgae.jpeg';
+import necklacesImg from '../../assets/Necklaces.jpg';
+import hairAccessoriesImg from '../../assets/Hair accessories.jpg';
+import ringsImg from '../../assets/Rings.jpg';
+import hipChainsImg from '../../assets/Hip chain.jpg';
+import vyramHeroImg from '../../assets/vyramheroimgae.jpeg';
 
 const collectionImages = {
   'necklaces': necklacesImg,
   'bangles': banglesImg,
-  'hair-accessories': bridalHeroImg,
+  'hair-accessories': hairAccessoriesImg,
   'haram': haramImg,
   'earrings': earingImg,
-  'rings': banglesImg,
-  'tikkas': bridalHeroImg
+  'rings': ringsImg,
+  'tikkas': bridalHeroImg,
+  'hip-chains': hipChainsImg,
+  'bridal': vyramHeroImg,
+  'bridal-sets': vyramHeroImg
 };
 
 const CollectionsPage = () => {

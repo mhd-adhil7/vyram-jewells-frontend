@@ -254,11 +254,12 @@ const parseProductsFromCSV = (csvText) => {
   const rows = parseCSV(csvText);
   const headerIndex = rows.findIndex(row => {
     const cols = row.map(c => c.trim().toLowerCase());
-    return cols.includes('id') && cols.includes('price') && cols.includes('category') && cols.includes('image');
+    return cols.includes('id') && cols.includes('price') && cols.includes('category') && 
+      (cols.includes('image') || cols.includes('image_url') || cols.includes('image url') || cols.includes('optimized image url'));
   });
 
   if (headerIndex === -1) {
-    throw new Error('Invalid CSV: Columns id, price, category, and image are required.');
+    throw new Error('Invalid CSV: Columns id, price, category, and image/image_url are required.');
   }
 
   const headers = rows[headerIndex].map(h => h.trim().toLowerCase());
@@ -267,7 +268,12 @@ const parseProductsFromCSV = (csvText) => {
   const categoryIdx = headers.indexOf('category');
   const keywordsIdx = headers.findIndex(h => h === 'search_keywords' || h === 'search keywords' || h === 'keywords');
   const priceIdx = headers.indexOf('price');
-  const imageIdx = headers.indexOf('image');
+  
+  let imageIdx = headers.indexOf('image');
+  if (imageIdx === -1) imageIdx = headers.indexOf('image_url');
+  if (imageIdx === -1) imageIdx = headers.indexOf('image url');
+  if (imageIdx === -1) imageIdx = headers.indexOf('optimized image url');
+  
   const collectionIdx = headers.indexOf('collection');
 
   const productsList = [];
@@ -285,7 +291,7 @@ const parseProductsFromCSV = (csvText) => {
       const priceVal = parseFloat(cleanedPrice) || 0;
 
       const categoryVal = row[categoryIdx]?.trim() || '';
-      const imageVal = row[imageIdx]?.trim() || '';
+      const imageVal = imageIdx !== -1 ? row[imageIdx]?.trim() || '' : '';
       const collectionVal = collectionIdx !== -1 ? row[collectionIdx]?.trim() || '' : '';
 
       let nameVal = nameIdx !== -1 ? row[nameIdx]?.trim() : '';
@@ -318,6 +324,7 @@ const parseProductsFromCSV = (csvText) => {
         collection: collectionVal,
         search_keywords: keywordsVal,
         image: normalizeImage(imageVal),
+        image_url: normalizeImage(imageVal),
         stock: 10
       };
 

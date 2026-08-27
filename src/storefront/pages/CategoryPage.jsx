@@ -4,6 +4,28 @@ import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 import { categoryLabels } from '../data/catalog';
+import necklacesImg from '../../assets/Necklaces.jpg';
+import banglesImg from '../../assets/bangles.jpg';
+import earringsImg from '../../assets/earing.jpg';
+import hairAccessoriesImg from '../../assets/Hair accessories.jpg';
+import haramImg from '../../assets/haram.jpg';
+import hipChainsImg from '../../assets/Hip chain.jpg';
+import ringsImg from '../../assets/Rings.jpg';
+import tikkasImg from '../../assets/bridal-hero.jpg';
+import bridalSetsImg from '../../assets/vyramheroimgae.jpeg';
+
+const heroImages = {
+  'necklaces': necklacesImg,
+  'bangles': banglesImg,
+  'earrings': earringsImg,
+  'hair-accessories': hairAccessoriesImg,
+  'haram': haramImg,
+  'hip-chains': hipChainsImg,
+  'rings': ringsImg,
+  'tikkas': tikkasImg,
+  'bridal-sets': bridalSetsImg,
+  'bridal': bridalSetsImg
+};
 
 const normalizeCategory = (value) =>
   String(value || "")
@@ -77,25 +99,27 @@ const CategoryPage = () => {
     return products.filter((product) => normalizeCategory(product.category) === normalizeCategory(categorySlug));
   }, [products, categorySlug]);
 
+  const isBridalSlug = categorySlug === 'bridal' || categorySlug === 'bridal-sets';
+
   const filteredProducts = useMemo(() => {
-    if (categorySlug !== 'bridal') return categoryProducts;
+    if (!isBridalSlug) return categoryProducts;
     if (selectedCollection === 'all') return categoryProducts;
 
     const collectionMapping = {
-      'kerala': 'Kerala Bridal Collection',
-      'antique': 'Antique Bridal Collection',
-      'trending': 'Trending Bridal Collection',
-      'budget': 'Budget Friendly Collection',
-      'premium': 'Premium Sets Collection'
+      'malayali-manga': 'Malayali Manga',
+      'premium-bridal-bloom': 'Premium Bridal Bloom',
+      'bridal-vogue': 'Bridal Vogue'
     };
 
     const targetCollection = collectionMapping[selectedCollection] || '';
     if (!targetCollection) return categoryProducts;
 
-    return categoryProducts.filter(
-      (p) => p.collection && p.collection.trim().toLowerCase() === targetCollection.toLowerCase()
-    );
-  }, [categoryProducts, categorySlug, selectedCollection]);
+    return categoryProducts.filter((p) => {
+      const prodCol = p.collection ? p.collection.trim().replace(/\s+/g, ' ').toLowerCase() : '';
+      const targetCol = targetCollection.trim().replace(/\s+/g, ' ').toLowerCase();
+      return prodCol === targetCol;
+    });
+  }, [categoryProducts, isBridalSlug, selectedCollection]);
 
   if (!googleLoading && !isCategoryValid) {
     return <Navigate to="/collections" replace />;
@@ -173,7 +197,7 @@ const CategoryPage = () => {
         </div>
         <div className="collections-hero-image">
           <img
-            src={`/assets/cat-${categorySlug}.png`}
+            src={heroImages[categorySlug.toLowerCase()] || `/assets/cat-${categorySlug}.png`}
             alt={categoryLabel}
             onError={(e) => {
               e.target.src = '/assets/product-default.png';
@@ -183,15 +207,13 @@ const CategoryPage = () => {
       </section>
 
       <section className="main-collections" style={{ padding: '60px 5%' }}>
-        {categorySlug === 'bridal' && (
+        {isBridalSlug && (
           <div className="new-arrivals-filters" style={{ marginBottom: '40px', justifyContent: 'center' }}>
             {[
               { slug: 'all', name: 'All' },
-              { slug: 'kerala', name: 'Kerala Bridal' },
-              { slug: 'antique', name: 'Antique Bridal' },
-              { slug: 'trending', name: 'Trending Bridal' },
-              { slug: 'budget', name: 'Budget Friendly' },
-              { slug: 'premium', name: 'Premium Sets' }
+              { slug: 'malayali-manga', name: 'Malayali Manga' },
+              { slug: 'premium-bridal-bloom', name: 'Premium Bridal Bloom' },
+              { slug: 'bridal-vogue', name: 'Bridal Vogue' }
             ].map((item) => (
               <button
                 key={item.slug}

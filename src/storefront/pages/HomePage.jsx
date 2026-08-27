@@ -2,13 +2,16 @@ import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import QuickViewModal from '../components/QuickViewModal';
-import { bridalCollections } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
-import image from '../../assets/vyramheroimgae.jpeg';
+import vyramHeroImg from '../../assets/vyramheroimgae.jpeg';
 import banglesImg from '../../assets/bangles.jpg';
 import earingImg from '../../assets/earing.jpg';
 import haramImg from '../../assets/haram.jpg';
 import bridalHeroImg from '../../assets/bridal-hero.jpg';
+import necklacesImg from '../../assets/Necklaces.jpg';
+import hairAccessoriesImg from '../../assets/Hair accessories.jpg';
+import ringsImg from '../../assets/Rings.jpg';
+import hipChainsImg from '../../assets/Hip chain.jpg';
 import keralaBridalImg from '../../assets/bridal/Kerala bridal.jpg';
 import antiqueBrideImg from '../../assets/bridal/Antique bride.jpg';
 import trendingImg from '../../assets/bridal/Trending.jpg';
@@ -23,14 +26,18 @@ const bridalCategories = [
   { name: 'Premium Sets Collection', image: premiumSetsImg, slug: 'premium' }
 ];
 
+
 const collectionImages = {
-  'necklaces': image,
+  'necklaces': necklacesImg,
   'bangles': banglesImg,
-  'hair-accessories': bridalHeroImg,
+  'hair-accessories': hairAccessoriesImg,
   'haram': haramImg,
   'earrings': earingImg,
-  'rings': banglesImg,
-  'tikkas': bridalHeroImg
+  'rings': ringsImg,
+  'tikkas': bridalHeroImg,
+  'hip-chains': hipChainsImg,
+  'bridal': vyramHeroImg,
+  'bridal-sets': vyramHeroImg
 };
 
 const HomePage = () => {
@@ -156,12 +163,12 @@ const HomePage = () => {
             </div>
 
             <div className="image-wrapper main-img">
-              <img src={image} alt="" />
+              <img src={vyramHeroImg} alt="" />
             </div>
 
             <div className="image-wrapper top-left-img">
               <img
-                src="/assets/cat-necklaces.png"
+                src={necklacesImg}
                 alt="Necklace Close up"
                 style={{ objectPosition: 'top center' }}
               />
@@ -169,7 +176,7 @@ const HomePage = () => {
 
             <div className="image-wrapper bottom-right-img">
               <img
-                src="/assets/cat-earrings.png"
+                src={earingImg}
                 alt="Earring Close up"
                 style={{ objectPosition: 'bottom right' }}
               />
@@ -226,7 +233,7 @@ const HomePage = () => {
             return (
               <Link
                 key={cat.slug}
-                to={`/collections/bridal?collection=${cat.slug}`}
+                to={`/bridal/${cat.slug}`}
                 className="collection-item reveal-on-scroll page-transition-link"
                 style={{ textDecoration: 'none', transitionDelay: `${(index + 1) * 0.1}s` }}
               >
@@ -289,32 +296,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="bridal-section">
-        <div className="section-title reveal-on-scroll">
-          <h2>FEATURED BRIDAL COLLECTIONS</h2>
-          <div className="title-line">
-            <span></span>
-          </div>
-        </div>
-
-        <div className="bridal-grid three-cols">
-          {bridalCollections.map((collection, index) => (
-            <Link
-              key={collection.slug}
-              to={`/bridal/${collection.slug}`}
-              className="bridal-item page-transition-link reveal-on-scroll"
-              style={{ transitionDelay: `${(index + 1) * 0.1}s` }}
-            >
-              <div className="arch-outline">
-                <div className="arch-img">
-                  <img src={collection.image} alt={collection.title} />
-                  <div className="overlay-text">{collection.title.toUpperCase()}</div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
 
       <QuickViewModal
         product={quickViewProduct}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import banglesImg from '../../assets/bangles.jpg';
 
 const WHATSAPP_NUMBER = '919605272671';
 
@@ -69,7 +70,7 @@ const ContactPage = () => {
       <section className="contact-split-new fade-in-on-scroll">
         <div className="contact-split-container">
           <div className="contact-image-side">
-            <img src="/assets/cat-bangles.png" alt="Vyram Jewelry Aesthetic" />
+            <img src={banglesImg} alt="Vyram Jewelry Aesthetic" />
           </div>
 
           <div className="contact-form-side-new">

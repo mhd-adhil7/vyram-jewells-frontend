@@ -8,7 +8,7 @@ const secondaryNavItems = [
   { to: '/', label: 'Home', end: true },
   { to: '/about', label: 'About' },
   { to: '/collections', label: 'Collections' },
-  { to: '/collections/bridal', label: 'Bridal' },
+  { to: '/bridal', label: 'Bridal' },
   { to: '/contact', label: 'Contact' }
 ];
 
@@ -85,7 +85,7 @@ const StoreLayout = () => {
             Trending Jewellery
           </Link>
           <Link
-            to="/collections/bridal"
+            to="/bridal"
             className="nav-text page-transition-link"
             onClick={() => setMobileMenuOpen(false)}
           >
