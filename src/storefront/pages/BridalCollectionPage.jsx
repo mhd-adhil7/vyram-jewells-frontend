@@ -170,6 +170,48 @@ const BridalCollectionPage = () => {
         {pageContent}
       </section>
 
+      <section className="rental-terms-section reveal-on-scroll">
+        <div className="rental-terms-container-minimal">
+          <div className="section-title" style={{ marginBottom: '40px' }}>
+            <h2>RENTAL TERMS & CONDITIONS</h2>
+            <div className="title-line">
+              <span></span>
+            </div>
+          </div>
+          
+          <div className="rental-terms-list-minimal">
+            <div className="rental-term-row">
+              <span className="term-num-minimal">01</span>
+              <p>At any cost, the <span className="highlight-text-subtle">advance payment</span> is not refundable.</p>
+            </div>
+            <div className="rental-term-row">
+              <span className="term-num-minimal">02</span>
+              <p>For any damage refund claim, an <span className="highlight-text-subtle">opening/unboxing video</span> is compulsory.</p>
+            </div>
+            <div className="rental-term-row">
+              <span className="term-num-minimal">03</span>
+              <p>The rental payment is final and <span className="highlight-text-subtle">non-refundable</span>.</p>
+            </div>
+            <div className="rental-term-row">
+              <span className="term-num-minimal">04</span>
+              <p>The caution deposit is <span className="highlight-text-subtle">refundable</span>. The amount depends on the ornaments selected by the customer.</p>
+            </div>
+            <div className="rental-term-row">
+              <span className="term-num-minimal">05</span>
+              <p>Your booking will be confirmed only after the <span className="highlight-text-subtle">advance payment</span> is received.</p>
+            </div>
+            <div className="rental-term-row">
+              <span className="term-num-minimal">06</span>
+              <p>The normal rental period is <span className="highlight-text-subtle">4 to 5 days</span>. If the ornaments are returned late, <span className="highlight-text-subtle">₹500 per day</span> will be deducted from the caution deposit.</p>
+            </div>
+            <div className="rental-term-row">
+              <span className="term-num-minimal">07</span>
+              <p>The rental amount cannot be refunded whether the ornaments have been used or not. This is the final decision.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <QuickViewModal
         product={quickViewProduct}
         isOpen={isQuickViewOpen}

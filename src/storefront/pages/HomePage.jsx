@@ -126,6 +126,19 @@ const HomePage = () => {
     };
   }, [products]);
 
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+
+  useEffect(() => {
+    if (isTermsOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isTermsOpen]);
+
   return (
     <>
       <section className="hero">
@@ -296,6 +309,57 @@ const HomePage = () => {
         </div>
       </section>
 
+      <section className="home-terms-section reveal-on-scroll" style={{ textAlign: 'center', padding: '40px 0 60px' }}>
+        <button 
+          type="button"
+          onClick={() => setIsTermsOpen(true)} 
+          className="btn-terms-trigger"
+        >
+          View Rental Terms & Conditions
+        </button>
+      </section>
+
+      {/* Rental Terms & Conditions Modal */}
+      <div 
+        className={`terms-modal-overlay ${isTermsOpen ? 'active' : ''}`}
+        onClick={(e) => {
+          if (e.target.classList.contains('terms-modal-overlay')) {
+            setIsTermsOpen(false);
+          }
+        }}
+      >
+        <div className="terms-modal-container">
+          <button 
+            type="button" 
+            className="terms-modal-close-btn" 
+            onClick={() => setIsTermsOpen(false)}
+            aria-label="Close Terms"
+          >
+            <i className="fa-solid fa-xmark"></i>
+          </button>
+          
+          <div className="terms-modal-content">
+            <span className="terms-modal-subtitle">Happy that you choosen us for your special day</span>
+            <p className="terms-modal-welcome">Welcome to Vyram Jewells</p>
+            <h2 className="terms-modal-title">TERMS AND CONDITIONS</h2>
+            <div className="terms-modal-divider">
+              <span className="divider-line"></span>
+              <span className="divider-dot"></span>
+              <span className="divider-line"></span>
+            </div>
+            
+            <ol className="terms-modal-list">
+              <li>At any cost, advance payment is not refundable.</li>
+              <li>For damage refund claims, an opening/unboxing video is compulsory.</li>
+              <li>Rental payment is final.</li>
+              <li>The caution deposit is refundable. The amount depends on the ornaments selected.</li>
+              <li>Your booking will be confirmed only after the advance payment is completed.</li>
+              <li>The normal rental period is <span className="highlight-gold">4 to 5 days</span>. If the ornaments are returned late, <span className="highlight-gold">₹500 per day</span> will be deducted from the caution deposit.</li>
+              <li>The rental amount is non-refundable whether the ornaments are used or not. This is the final policy.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
 
       <QuickViewModal
         product={quickViewProduct}
