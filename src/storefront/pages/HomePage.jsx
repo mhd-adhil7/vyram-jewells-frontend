@@ -339,8 +339,6 @@ const HomePage = () => {
           </button>
           
           <div className="terms-modal-content">
-            <span className="terms-modal-subtitle">Happy that you choosen us for your special day</span>
-            <p className="terms-modal-welcome">Welcome to Vyram Jewells</p>
             <h2 className="terms-modal-title">TERMS AND CONDITIONS</h2>
             <div className="terms-modal-divider">
               <span className="divider-line"></span>
