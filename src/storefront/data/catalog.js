@@ -275,3 +275,5 @@ export const formatPrice = (value) =>
     currency: 'INR',
     maximumFractionDigits: 0
   }).format(value);
+
+export const formatINR = formatPrice;

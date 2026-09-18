@@ -215,9 +215,6 @@ const AdminProductsPage = () => {
           return;
         }
 
-        console.log('[ImageKit Upload - Add Product] Selected file name:', selectedFile.name);
-        console.log('[ImageKit Upload - Add Product] Selected file object:', selectedFile);
-
         const authData = await getImageKitAuthFromDB();
         const cleanName = generateImageFileName(values.name, selectedFile.name);
 
@@ -228,14 +225,9 @@ const AdminProductsPage = () => {
           '/vyram-jewells/products'
         );
 
-        console.log('[ImageKit Upload - Add Product] ImageKit response:', uploadResult);
-        console.log('[ImageKit Upload - Add Product] Exact returned URL:', uploadResult.url);
-
         const uploadedImageUrl = uploadResult.url;
         const uploadedFileId = uploadResult.fileId;
         const uploadedFilePath = uploadResult.filePath;
-
-        console.log('[Database Insert - Add Product] Final image URL being inserted:', uploadedImageUrl);
 
         const payload = {
           ...values,
@@ -259,9 +251,6 @@ const AdminProductsPage = () => {
         let finalImagePath = formState.image_path || null;
 
         if (selectedFile) {
-          console.log('[ImageKit Upload - Edit Product] Selected file name:', selectedFile.name);
-          console.log('[ImageKit Upload - Edit Product] Selected file object:', selectedFile);
-
           const authData = await getImageKitAuthFromDB();
           const cleanName = generateImageFileName(values.name, selectedFile.name);
 
@@ -272,15 +261,10 @@ const AdminProductsPage = () => {
             '/vyram-jewells/products'
           );
 
-          console.log('[ImageKit Upload - Edit Product] ImageKit response:', uploadResult);
-          console.log('[ImageKit Upload - Edit Product] Exact returned URL:', uploadResult.url);
-
           finalImageUrl = uploadResult.url;
           finalImageFileId = uploadResult.fileId;
           finalImagePath = uploadResult.filePath;
         }
-
-        console.log('[Database Update - Edit Product] Final image URL being updated:', finalImageUrl);
 
         const payload = {
           ...values,

@@ -1,4 +1,7 @@
-import { neon } from '@neondatabase/serverless';
+import { neon, neonConfig } from '@neondatabase/serverless';
+
+// Disable Neon's client-side SQL execution browser warning
+neonConfig.disableWarningInBrowsers = true;
 
 // Default restricted read-only connection string for public storefront
 // Role: vyram_reader (can ONLY SELECT active products, cannot insert/update/delete)
@@ -16,14 +19,14 @@ let cachedStorefrontSql = null;
 
 export const getStorefrontSql = () => {
   if (!cachedStorefrontSql) {
-    cachedStorefrontSql = neon(readonlyUrl);
+    cachedStorefrontSql = neon(readonlyUrl, { disableWarningInBrowsers: true });
   }
   return cachedStorefrontSql;
 };
 
 export const getAdminSql = (customConnStr = null) => {
   const connStr = customConnStr || DEFAULT_ADMIN_URL;
-  return neon(connStr);
+  return neon(connStr, { disableWarningInBrowsers: true });
 };
 
 /**

@@ -167,8 +167,6 @@ export const ProductCatalogProvider = ({ children }) => {
       stock
     };
 
-    console.log('[ProductCatalogContext] Inserting product with image URL:', productPayload.image_url);
-
     const saved = await insertProductToNeon(productPayload);
 
     setCatalogProducts((prev) => {
