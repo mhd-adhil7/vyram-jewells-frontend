@@ -50,7 +50,7 @@ const categoryDescriptions = {
 };
 
 const CategoryPage = () => {
-  const { products, googleLoading, googleError, fetchNecklaces } = useProductCatalog();
+  const { products, isLoading, error, fetchProducts } = useProductCatalog();
   const { categorySlug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCollection = searchParams.get('collection') || 'all';
@@ -68,14 +68,14 @@ const CategoryPage = () => {
   }, []);
 
   const isCategoryValid = useMemo(() => {
-    if (googleLoading) return true;
+    if (isLoading) return true;
     const lowerSlug = categorySlug.toLowerCase();
     const standardKeys = Object.keys(categoryLabels).map(k => k.toLowerCase());
     return (
       standardKeys.includes(lowerSlug) ||
       products.some((p) => normalizeCategory(p.category) === normalizeCategory(categorySlug))
     );
-  }, [products, categorySlug, googleLoading]);
+  }, [products, categorySlug, isLoading]);
 
   const categoryLabel = useMemo(() => {
     const matchedProduct = products.find((p) => normalizeCategory(p.category) === normalizeCategory(categorySlug));
@@ -121,12 +121,12 @@ const CategoryPage = () => {
     });
   }, [categoryProducts, isBridalSlug, selectedCollection]);
 
-  if (!googleLoading && !isCategoryValid) {
+  if (!isLoading && !isCategoryValid) {
     return <Navigate to="/collections" replace />;
   }
 
   let pageContent;
-  if (googleLoading) {
+  if (isLoading) {
     pageContent = (
       <div className="empty-wishlist-state reveal-on-scroll" style={{ margin: '40px auto', maxWidth: '600px', textAlign: 'center' }}>
         <div className="empty-wishlist-icon">
@@ -138,7 +138,7 @@ const CategoryPage = () => {
         </p>
       </div>
     );
-  } else if (googleError) {
+  } else if (error) {
     pageContent = (
       <div className="empty-wishlist-state reveal-on-scroll" style={{ margin: '40px auto', maxWidth: '600px', textAlign: 'center' }}>
         <div className="empty-wishlist-icon">
@@ -148,7 +148,7 @@ const CategoryPage = () => {
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '1.1rem', color: 'var(--color-text-sub)', marginBottom: '35px' }}>
           We were unable to load the collection. Please check your connection and try again.
         </p>
-        <button onClick={() => fetchNecklaces(true)} className="btn btn-primary explore-btn" style={{ cursor: 'pointer', border: 'none' }}>
+        <button onClick={() => fetchProducts(true)} className="btn btn-primary explore-btn" style={{ cursor: 'pointer', border: 'none' }}>
           Retry Connection
         </button>
       </div>

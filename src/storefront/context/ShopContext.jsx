@@ -97,7 +97,7 @@ const readStorage = (key) => {
 const ShopContext = createContext(null);
 
 export const ShopProvider = ({ children }) => {
-  const { productsById, googleLoading } = useProductCatalog();
+  const { productsById, isLoading } = useProductCatalog();
 
 
 
@@ -124,18 +124,18 @@ export const ShopProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    if (googleLoading) return;
+    if (isLoading) return;
     const normalizedCart = normalizeCart(cart, productsById, nameToId);
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(normalizedCart));
-  }, [cart, productsById, nameToId, googleLoading]);
+  }, [cart, productsById, nameToId, isLoading]);
 
   useEffect(() => {
-    if (googleLoading) return;
+    if (isLoading) return;
     const normalizedWishlist = normalizeWishlist(wishlist, productsById, nameToId, {
       fallbackToDefault: false
     });
     window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(normalizedWishlist));
-  }, [wishlist, productsById, nameToId, googleLoading]);
+  }, [wishlist, productsById, nameToId, isLoading]);
 
   const cartItems = useMemo(
     () =>

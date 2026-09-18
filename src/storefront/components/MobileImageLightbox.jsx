@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { getLightboxImage } from '../../utils/imagekit';
 
 const MobileImageLightbox = ({ product, isOpen, onClose }) => {
   useEffect(() => {
@@ -47,7 +48,7 @@ const MobileImageLightbox = ({ product, isOpen, onClose }) => {
       </button>
       <div className="mobile-lightbox-content">
         <img
-          src={product.image}
+          src={getLightboxImage(product.image)}
           alt={product.name}
           className="mobile-lightbox-img"
           onError={(e) => {

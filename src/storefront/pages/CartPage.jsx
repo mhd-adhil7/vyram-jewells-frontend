@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '../data/catalog';
 import { useShop } from '../context/ShopContext';
+import { getThumbnailImage } from '../../utils/imagekit';
 
 const WHATSAPP_NUMBER = '919605272671';
 
@@ -83,7 +84,7 @@ const CartPage = () => {
                 <div key={item.id} className="cart-drawer-item-card">
                   <div className="cart-drawer-item-image">
                     <img
-                      src={item.product.image}
+                      src={getThumbnailImage(item.product.image)}
                       alt={item.product.name}
                       loading="lazy"
                       onError={(e) => {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { formatPrice } from '../data/catalog';
 import { useShop } from '../context/ShopContext';
 import MobileImageLightbox from './MobileImageLightbox';
+import { getProductCardImage } from '../../utils/imagekit';
 
 const ProductCard = ({ product, className = '', showQuickView = false, onQuickView, style }) => {
   const { addToCart, isWishlisted, toggleWishlist } = useShop();
@@ -50,7 +51,7 @@ const ProductCard = ({ product, className = '', showQuickView = false, onQuickVi
         }}
       >
         <img
-          src={product.image}
+          src={getProductCardImage(product.image)}
           alt={product.name}
           loading="lazy"
           onError={(e) => {

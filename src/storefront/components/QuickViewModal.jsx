@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { getProductDetailImage } from '../../utils/imagekit';
 
 const QuickViewModal = ({ product, isOpen, onClose }) => {
   useEffect(() => {
@@ -31,7 +32,7 @@ const QuickViewModal = ({ product, isOpen, onClose }) => {
         
         <div className="modal-image-container preview-only">
           <img
-            src={product.image}
+            src={getProductDetailImage(product.image)}
             alt={product.name}
             onError={(e) => {
               e.target.src = '/assets/product-default.png';

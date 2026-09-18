@@ -5,6 +5,7 @@ import QuickViewModal from '../components/QuickViewModal';
 import { formatPrice } from '../data/catalog';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 import { useShop } from '../context/ShopContext';
+import { getProductCardImage } from '../../utils/imagekit';
 
 const WishlistPage = () => {
   const { products } = useProductCatalog();
@@ -55,7 +56,7 @@ const WishlistPage = () => {
                 >
                   <div className="product-image-container">
                     <img
-                      src={product.image}
+                      src={getProductCardImage(product.image)}
                       alt={product.name}
                       loading="lazy"
                       onError={(e) => {

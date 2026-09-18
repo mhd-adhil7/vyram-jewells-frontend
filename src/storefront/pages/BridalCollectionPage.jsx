@@ -45,7 +45,7 @@ const normalizeName = (name) => {
 };
 
 const BridalCollectionPage = () => {
-  const { products, googleLoading, googleError, fetchNecklaces } = useProductCatalog();
+  const { products, isLoading, error, fetchProducts } = useProductCatalog();
   const { collectionSlug } = useParams();
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -92,13 +92,13 @@ const BridalCollectionPage = () => {
   }, [products, details.name]);
 
   let pageContent;
-  if (googleLoading) {
+  if (isLoading) {
     pageContent = (
       <div style={{ textAlign: 'center', padding: '40px 0' }}>
         <p>Loading Products...</p>
       </div>
     );
-  } else if (googleError) {
+  } else if (error) {
     pageContent = (
       <div className="empty-wishlist-state reveal-on-scroll" style={{ margin: '40px auto', maxWidth: '600px', textAlign: 'center' }}>
         <div className="empty-wishlist-icon">
@@ -108,7 +108,7 @@ const BridalCollectionPage = () => {
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '1.1rem', color: 'var(--color-text-sub)', marginBottom: '35px' }}>
           We were unable to load the collection. Please check your connection and try again.
         </p>
-        <button onClick={() => fetchNecklaces(true)} className="btn btn-primary explore-btn" style={{ cursor: 'pointer', border: 'none' }}>
+        <button onClick={() => fetchProducts(true)} className="btn btn-primary explore-btn" style={{ cursor: 'pointer', border: 'none' }}>
           Retry Connection
         </button>
       </div>
