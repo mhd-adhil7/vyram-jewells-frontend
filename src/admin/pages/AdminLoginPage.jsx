@@ -3,7 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 
 const AdminLoginPage = () => {
-  const { isAuthenticated, login, demoCredentials } = useAdminAuth();
+  const { isAuthenticated, login } = useAdminAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from || '/admin';
@@ -16,11 +16,11 @@ const AdminLoginPage = () => {
     return <Navigate to="/admin" replace />;
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
 
-    const result = login({ email, password });
+    const result = await login({ email, password });
     if (!result.ok) {
       setError(result.error);
       return;
@@ -45,7 +45,7 @@ const AdminLoginPage = () => {
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="admin@vyramjewells.com"
+              placeholder="Enter your email"
               required
             />
           </label>
@@ -67,12 +67,6 @@ const AdminLoginPage = () => {
 
           <button type="submit">Sign In</button>
         </form>
-
-        <div className="admin-auth-hint">
-          <p>Demo credentials</p>
-          <code>{demoCredentials.email}</code>
-          <code>{demoCredentials.password}</code>
-        </div>
 
         <Link className="admin-auth-back" to="/">
           Back to Storefront
