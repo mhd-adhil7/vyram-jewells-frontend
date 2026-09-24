@@ -162,7 +162,7 @@ export const ProductCatalogProvider = ({ children }) => {
       image_path: rawInput?.image_path || null,
       additional_images: rawInput?.additional_images || [],
       search_keywords: rawInput?.search_keywords || rawInput?.searchKeywords || '',
-      is_active: true,
+      is_active: rawInput?.is_active !== undefined ? Boolean(rawInput.is_active) : true,
       sort_order: rawInput?.sort_order || 0,
       stock
     };

@@ -2,14 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import AdminLayout from './admin/components/AdminLayout';
 import RequireAdminAuth from './admin/components/RequireAdminAuth';
 import { AdminAuthProvider } from './admin/context/AdminAuthContext';
-import AdminAnalyticsPage from './admin/pages/AdminAnalyticsPage';
-import AdminCustomersPage from './admin/pages/AdminCustomersPage';
-import AdminDashboardPage from './admin/pages/AdminDashboardPage';
 import AdminLoginPage from './admin/pages/AdminLoginPage';
-import AdminMessagesPage from './admin/pages/AdminMessagesPage';
-import AdminOrdersPage from './admin/pages/AdminOrdersPage';
 import AdminProductsPage from './admin/pages/AdminProductsPage';
-import AdminSettingsPage from './admin/pages/AdminSettingsPage';
 import StoreLayout from './storefront/components/StoreLayout';
 import { ProductCatalogProvider } from './storefront/context/ProductCatalogContext';
 import { ShopProvider } from './storefront/context/ShopContext';
@@ -36,13 +30,8 @@ const App = () => {
 
               <Route element={<RequireAdminAuth />}>
                 <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<AdminDashboardPage />} />
+                  <Route index element={<AdminProductsPage />} />
                   <Route path="products" element={<AdminProductsPage />} />
-                  <Route path="orders" element={<AdminOrdersPage />} />
-                  <Route path="customers" element={<AdminCustomersPage />} />
-                  <Route path="messages" element={<AdminMessagesPage />} />
-                  <Route path="analytics" element={<AdminAnalyticsPage />} />
-                  <Route path="settings" element={<AdminSettingsPage />} />
                   <Route path="*" element={<Navigate to="/admin" replace />} />
                 </Route>
               </Route>

@@ -1,144 +1,141 @@
-import { useMemo, useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { categoryLabels, formatPrice } from '../../storefront/data/catalog';
 import { useProductCatalog } from '../../storefront/context/ProductCatalogContext';
 import { getImageKitAuthFromDB, uploadFileToImageKit } from '../../utils/neon';
-import { getThumbnailImage, DEFAULT_FALLBACK_IMAGE } from '../../utils/imagekit';
+import { getThumbnailImage } from '../../utils/imagekit';
 
 const CATEGORY_OPTIONS = Object.entries(categoryLabels).filter(([key]) => key !== 'all');
 
-const EMPTY_FORM_STATE = {
-  id: '',
+const BRIDAL_COLLECTION_OPTIONS = [
+  { value: '', label: 'None (Standard Product)' },
+  { value: 'Malayali Manga', label: 'Malayali Manga' },
+  { value: 'Kerala Bridal Collection', label: 'Kerala Bridal Collection' },
+  { value: 'Antique Bridal Collection', label: 'Antique Bridal Collection' },
+  { value: 'Trending Bridal Collection', label: 'Trending Bridal Collection' },
+  { value: 'Budget Friendly Collection', label: 'Budget Friendly Collection' },
+  { value: 'Premium Sets Collection', label: 'Premium Sets Collection' }
+];
+
+const INITIAL_FORM = {
   name: '',
-  category: CATEGORY_OPTIONS[0]?.[1] ?? 'Necklaces',
+  category: CATEGORY_OPTIONS[0]?.[1] || 'Necklaces',
   bridal_collection: '',
-  description: '',
   price: '',
   sale_price: '',
+  sku: '',
   stock: '10',
+  description: '',
   search_keywords: '',
-  image_url: '',
-  image_file_id: '',
-  image_path: ''
+  is_active: true
 };
 
 const generateImageFileName = (productName, originalFileName) => {
   const ext = originalFileName.substring(originalFileName.lastIndexOf('.')).toLowerCase() || '.jpg';
-  const cleanTitle = (productName || 'item').slice(0, 20).toLowerCase().replace(/[^a-z0-9]/g, '-');
-  return `vyram_${cleanTitle}_${Math.random().toString(36).slice(2, 9)}${ext}`;
+  const cleanTitle = (productName || 'product')
+    .slice(0, 24)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-');
+  return `vyram_${cleanTitle}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}${ext}`;
 };
 
-const toFormState = (product) => ({
-  id: String(product.id),
-  name: product.name || '',
-  category: product.category || CATEGORY_OPTIONS[0]?.[1] || 'Necklaces',
-  bridal_collection: product.bridal_collection || product.collection || '',
-  description: product.description || '',
-  price: String(product.price ?? ''),
-  sale_price: product.sale_price !== null && product.sale_price !== undefined ? String(product.sale_price) : '',
-  stock: String(product.stock ?? 10),
-  search_keywords: product.search_keywords || product.searchKeywords || '',
-  image_url: product.image_url || product.image || '',
-  image_file_id: product.image_file_id || '',
-  image_path: product.image_path || ''
-});
-
 const AdminProductsPage = () => {
-  const { products, createProduct, updateProduct, deleteProduct, fetchProducts, isLoading } = useProductCatalog();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [mode, setMode] = useState('create');
-  const [activeId, setActiveId] = useState('');
-  const [formState, setFormState] = useState(EMPTY_FORM_STATE);
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [formError, setFormError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const { products, createProduct, fetchProducts } = useProductCatalog();
 
-  // File upload state
+  // Form State
+  const [formState, setFormState] = useState(INITIAL_FORM);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  // Status & Validation State
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [formError, setFormError] = useState('');
+  const [createdProduct, setCreatedProduct] = useState(null);
+
   const fileInputRef = useRef(null);
 
-  const filteredProducts = useMemo(() => {
-    let result = products;
+  // Check whether all required fields are filled for enabling the submit button
+  const isFormValid = useMemo(() => {
+    const hasName = formState.name.trim().length > 0;
+    const hasCategory = Boolean(formState.category);
+    const parsedPrice = Number(formState.price);
+    const hasValidPrice = Number.isFinite(parsedPrice) && parsedPrice > 0;
+    const hasImage = Boolean(selectedFile);
+    return hasName && hasCategory && hasValidPrice && hasImage;
+  }, [formState.name, formState.category, formState.price, selectedFile]);
 
-    if (categoryFilter !== 'all') {
-      result = result.filter(
-        (p) =>
-          String(p.category || '').toLowerCase() === categoryFilter.toLowerCase() ||
-          String(p.categorySlug || '').toLowerCase() === categoryFilter.toLowerCase()
-      );
-    }
-
-    if (searchTerm.trim()) {
-      const query = searchTerm.trim().toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          String(p.id).toLowerCase().includes(query) ||
-          String(p.category || '').toLowerCase().includes(query) ||
-          String(p.search_keywords || '').toLowerCase().includes(query)
-      );
-    }
-
-    return result;
-  }, [products, searchTerm, categoryFilter]);
-
-  const resetForm = () => {
-    setFieldErrors({});
-    setFormError('');
-    setSelectedFile(null);
-    setImagePreview(null);
-    setIsSubmitting(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handleInputChange = (field, value) => {
+    setFormState((prev) => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => ({ ...prev, [field]: null }));
     }
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setMode('create');
-    setActiveId('');
-    setFormState(EMPTY_FORM_STATE);
-    resetForm();
-  };
-
-  const openCreateModal = () => {
-    setMode('create');
-    setActiveId('');
-    setFormState(EMPTY_FORM_STATE);
-    resetForm();
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (product) => {
-    setMode('edit');
-    setActiveId(String(product.id));
-    setFormState(toFormState(product));
-    resetForm();
-    setImagePreview(product.image_url || product.image || null);
-    setIsModalOpen(true);
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
+  const processFile = (file) => {
     if (!file) return;
 
-    // Validate type
     if (!file.type.startsWith('image/')) {
-      setFieldErrors((prev) => ({ ...prev, image: 'Please select a valid image file.' }));
+      setFieldErrors((prev) => ({ ...prev, image: 'Please select a valid image (PNG, JPG, WEBP).' }));
       return;
     }
 
-    // Max 15MB
     if (file.size > 15 * 1024 * 1024) {
-      setFieldErrors((prev) => ({ ...prev, image: 'Image size should not exceed 15MB.' }));
+      setFieldErrors((prev) => ({ ...prev, image: 'Image size must be less than 15MB.' }));
       return;
     }
 
     setSelectedFile(file);
     setImagePreview(URL.createObjectURL(file));
     setFieldErrors((prev) => ({ ...prev, image: null }));
+    setFormError('');
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    processFile(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isSubmitting) {
+      setIsDragOver(true);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    if (isSubmitting) return;
+
+    const file = e.dataTransfer.files?.[0];
+    processFile(file);
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+      setImagePreview(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleTriggerFileInput = () => {
+    if (!isSubmitting && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   const validateForm = () => {
@@ -147,375 +144,374 @@ const AdminProductsPage = () => {
     const parsedPrice = Number(formState.price);
     const parsedStock = Number(formState.stock);
 
-    if (mode === 'create') {
-      const trimmedId = formState.id.trim();
-      if (trimmedId && products.some((p) => String(p.id) === trimmedId)) {
-        errors.id = 'This product ID is already in use.';
-      }
-      if (!selectedFile) {
-        errors.image = 'Please upload a product image.';
-      }
-    } else {
-      if (!selectedFile && !formState.image_url && !formState.image) {
-        errors.image = 'Please upload a product image.';
-      }
-    }
-
     if (!trimmedName) {
       errors.name = 'Product name is required.';
     }
 
     if (!formState.category) {
-      errors.category = 'Category is required.';
+      errors.category = 'Please select a category.';
     }
 
     if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
-      errors.price = 'Price must be greater than 0.';
+      errors.price = 'Price must be a valid number greater than 0.';
+    }
+
+    if (formState.sale_price) {
+      const parsedSale = Number(formState.sale_price);
+      if (!Number.isFinite(parsedSale) || parsedSale <= 0) {
+        errors.sale_price = 'Sale price must be greater than 0.';
+      } else if (parsedSale >= parsedPrice) {
+        errors.sale_price = 'Sale price should be lower than original price.';
+      }
     }
 
     if (!Number.isFinite(parsedStock) || parsedStock < 0) {
-      errors.stock = 'Stock must be 0 or greater.';
+      errors.stock = 'Stock units must be 0 or greater.';
+    }
+
+    const trimmedSku = formState.sku.trim();
+    if (trimmedSku && products.some((p) => String(p.id).toLowerCase() === trimmedSku.toLowerCase())) {
+      errors.sku = 'This SKU / Product ID is already in use. Please enter a unique ID.';
+    }
+
+    if (!selectedFile) {
+      errors.image = 'Product image is required. Please upload an image.';
     }
 
     return {
+      isValid: Object.keys(errors).length === 0,
       errors,
       values: {
-        id: formState.id.trim() || undefined,
+        id: trimmedSku || undefined,
         name: trimmedName,
         category: formState.category,
         bridal_collection: formState.bridal_collection || null,
-        description: formState.description.trim(),
         price: parsedPrice,
         sale_price: formState.sale_price ? Number(formState.sale_price) : null,
         stock: Math.floor(parsedStock),
-        search_keywords: formState.search_keywords.trim()
+        description:
+          formState.description.trim() ||
+          `Exquisite handcrafted ${trimmedName}, designed with timeless artistry for elegance and celebration.`,
+        search_keywords: formState.search_keywords.trim(),
+        is_active: formState.is_active
       }
     };
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
 
-    const { errors, values } = validateForm();
-    setFieldErrors(errors);
     setFormError('');
+    setCreatedProduct(null);
 
-    if (Object.keys(errors).length > 0) {
+    const { isValid, errors, values } = validateForm();
+    setFieldErrors(errors);
+
+    if (!isValid) {
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      if (mode === 'create') {
-        // --- ADD PRODUCT FLOW (Strictly separated: no old image fallback) ---
-        if (!selectedFile) {
-          setFieldErrors((prev) => ({ ...prev, image: 'Please select an image file.' }));
-          setIsSubmitting(false);
-          return;
-        }
+      // 1. Obtain ImageKit upload authorization tokens securely from Neon PostgreSQL
+      const authData = await getImageKitAuthFromDB();
+      const uniqueFileName = generateImageFileName(values.name, selectedFile.name);
 
-        const authData = await getImageKitAuthFromDB();
-        const cleanName = generateImageFileName(values.name, selectedFile.name);
+      // 2. Upload file directly to ImageKit CDN
+      const uploadResult = await uploadFileToImageKit(
+        selectedFile,
+        uniqueFileName,
+        authData,
+        '/vyram-jewells/products'
+      );
 
-        const uploadResult = await uploadFileToImageKit(
-          selectedFile,
-          cleanName,
-          authData,
-          '/vyram-jewells/products'
-        );
+      // 3. Assemble complete product payload with real ImageKit CDN URL and identifiers
+      const payload = {
+        ...values,
+        image_url: uploadResult.url,
+        image: uploadResult.url,
+        image_file_id: uploadResult.fileId || null,
+        image_path: uploadResult.filePath || null
+      };
 
-        const uploadedImageUrl = uploadResult.url;
-        const uploadedFileId = uploadResult.fileId;
-        const uploadedFilePath = uploadResult.filePath;
+      // 4. Insert product record into Neon PostgreSQL
+      const saved = await createProduct(payload);
 
-        const payload = {
-          ...values,
-          image_url: uploadedImageUrl,
-          image: uploadedImageUrl,
-          image_file_id: uploadedFileId || null,
-          image_path: uploadedFilePath || null
-        };
-
-        await createProduct(payload);
-
-        if (typeof fetchProducts === 'function') {
-          await fetchProducts();
-        }
-
-        closeModal();
-      } else {
-        // --- EDIT PRODUCT FLOW ---
-        let finalImageUrl = formState.image_url || formState.image || null;
-        let finalImageFileId = formState.image_file_id || null;
-        let finalImagePath = formState.image_path || null;
-
-        if (selectedFile) {
-          const authData = await getImageKitAuthFromDB();
-          const cleanName = generateImageFileName(values.name, selectedFile.name);
-
-          const uploadResult = await uploadFileToImageKit(
-            selectedFile,
-            cleanName,
-            authData,
-            '/vyram-jewells/products'
-          );
-
-          finalImageUrl = uploadResult.url;
-          finalImageFileId = uploadResult.fileId;
-          finalImagePath = uploadResult.filePath;
-        }
-
-        const payload = {
-          ...values,
-          image_url: finalImageUrl,
-          image: finalImageUrl,
-          image_file_id: finalImageFileId,
-          image_path: finalImagePath
-        };
-
-        await updateProduct(activeId, payload);
-
-        if (typeof fetchProducts === 'function') {
-          await fetchProducts();
-        }
-
-        closeModal();
+      // Refresh catalog cache
+      if (typeof fetchProducts === 'function') {
+        fetchProducts().catch(console.error);
       }
-    } catch (error) {
-      console.error('Save product error:', error);
-      setFormError(error instanceof Error ? error.message : 'Unable to save product.');
+
+      // 5. Success state and clean reset
+      setCreatedProduct(saved);
+      setFormState(INITIAL_FORM);
+      setSelectedFile(null);
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+        setImagePreview(null);
+      }
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      setFieldErrors({});
+    } catch (err) {
+      console.error('Failed to add product:', err);
+      setFormError(err instanceof Error ? err.message : 'Failed to upload product. Please try again.');
+    } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async (product) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to remove "${product.name}"? This product will be deactivated in Neon.`
-    );
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      await deleteProduct(product.id, true);
-    } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Unable to delete product.');
-    }
+  const handleResetSuccess = () => {
+    setCreatedProduct(null);
+    setFormState(INITIAL_FORM);
+    handleRemoveImage();
   };
 
   return (
-    <>
-      <section className="admin-card">
-        <div className="admin-card-header">
-          <div>
-            <h2>Products Management</h2>
-            <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#687763' }}>
-              Connected to Neon PostgreSQL & ImageKit CDN ({products.length} total products)
+    <div className="admin-product-add-wrapper">
+      {/* Page Header */}
+      <div className="admin-page-intro">
+        <div className="admin-page-tag">Product Management</div>
+        <h1 className="admin-page-title">Add New Product</h1>
+        <p className="admin-page-desc">
+          Upload fine jewelry imagery and publish handcrafted pieces directly to the Vyram live catalog.
+        </p>
+      </div>
+
+      {/* Success Banner */}
+      {createdProduct && (
+        <div className="admin-success-card" role="alert">
+          <div className="admin-success-icon">
+            <i className="fa-solid fa-circle-check"></i>
+          </div>
+          <div className="admin-success-body">
+            <h3>Product Published Successfully!</h3>
+            <p>
+              <strong>{createdProduct.name}</strong> ({formatPrice(createdProduct.price)}) has been securely uploaded to
+              ImageKit and saved to the live database.
             </p>
+            <div className="admin-success-meta">
+              <div className="admin-success-thumb">
+                <img
+                  src={getThumbnailImage(createdProduct.image_url || createdProduct.image)}
+                  alt={createdProduct.name}
+                />
+              </div>
+              <div className="admin-success-details">
+                <span className="admin-success-badge">{createdProduct.category}</span>
+                {createdProduct.bridal_collection && (
+                  <span className="admin-success-badge gold">{createdProduct.bridal_collection}</span>
+                )}
+                <span className="admin-success-sku">SKU: {createdProduct.id}</span>
+              </div>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              style={{
-                padding: '0.45rem 0.8rem',
-                border: '1px solid #c4cec0',
-                borderRadius: '4px',
-                outline: 'none',
-                fontFamily: 'inherit',
-                fontSize: '0.85rem'
-              }}
-            >
-              <option value="all">All Categories</option>
-              {CATEGORY_OPTIONS.map(([key, label]) => (
-                <option key={key} value={label}>
-                  {label}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                padding: '0.45rem 0.8rem',
-                border: '1px solid #c4cec0',
-                borderRadius: '4px',
-                outline: 'none',
-                fontFamily: 'inherit',
-                fontSize: '0.85rem',
-                minWidth: '200px'
-              }}
-            />
-
-            <button type="button" onClick={openCreateModal} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <i className="fa-solid fa-plus"></i>
-              Add Product
+          <div className="admin-success-actions">
+            <button type="button" className="admin-btn-secondary" onClick={handleResetSuccess}>
+              <i className="fa-solid fa-plus"></i> Add Another Product
             </button>
+            <Link to="/" target="_blank" rel="noreferrer" className="admin-btn-primary">
+              <i className="fa-solid fa-arrow-up-right-from-square"></i> View on Store
+            </Link>
           </div>
         </div>
+      )}
 
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th style={{ width: '60px' }}>Image</th>
-                <th style={{ width: '70px' }}>ID</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Status</th>
-                <th style={{ width: '90px' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading && products.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="admin-empty-row">
-                    Loading products from Neon database...
-                  </td>
-                </tr>
-              ) : filteredProducts.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="admin-empty-row">
-                    No products found matching your search.
-                  </td>
-                </tr>
-              ) : (
-                filteredProducts.map((product) => (
-                  <tr key={product.id}>
-                    <td>
-                      <div
-                        style={{
-                          width: '42px',
-                          height: '42px',
-                          borderRadius: '4px',
-                          overflow: 'hidden',
-                          background: '#f2f4f1',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <img
-                          src={getThumbnailImage(product.image || product.image_url)}
-                          alt={product.name}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          onError={(e) => {
-                            e.target.src = DEFAULT_FALLBACK_IMAGE;
-                          }}
-                        />
-                      </div>
-                    </td>
-                    <td>
-                      <code style={{ fontSize: '0.85rem' }}>{product.id}</code>
-                    </td>
-                    <td>
-                      <strong>{product.name}</strong>
-                      {product.bridal_collection ? (
-                        <span
-                          style={{
-                            display: 'block',
-                            fontSize: '0.75rem',
-                            color: '#c9933b',
-                            marginTop: '2px'
-                          }}
-                        >
-                          {product.bridal_collection}
-                        </span>
-                      ) : null}
-                    </td>
-                    <td>{product.category}</td>
-                    <td>{formatPrice(product.price)}</td>
-                    <td>{product.stock ?? 10}</td>
-                    <td>
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '0.75rem',
-                          fontWeight: '600',
-                          background: product.is_active ? '#e7f4e8' : '#fbeae8',
-                          color: product.is_active ? '#2b7a35' : '#c93b2b'
-                        }}
-                      >
-                        {product.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="admin-row-actions">
-                      <button
-                        type="button"
-                        aria-label="Edit product"
-                        title="Edit product"
-                        onClick={() => openEditModal(product)}
-                      >
-                        <i className="fa-regular fa-pen-to-square"></i>
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Delete product"
-                        title="Delete/Deactivate product"
-                        onClick={() => handleDelete(product)}
-                      >
-                        <i className="fa-regular fa-trash-can"></i>
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      {/* Global Form Error Banner */}
+      {formError && (
+        <div className="admin-alert-error" role="alert">
+          <i className="fa-solid fa-triangle-exclamation"></i>
+          <div>
+            <strong>Upload Error:</strong> {formError}
+          </div>
         </div>
-      </section>
+      )}
 
-      {isModalOpen ? (
-        <div
-          className="admin-modal-backdrop"
-          role="presentation"
-          onClick={(event) => event.target === event.currentTarget && !isSubmitting && closeModal()}
-        >
-          <section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-product-form-title">
-            <header className="admin-modal-head">
-              <h3 id="admin-product-form-title">{mode === 'create' ? 'Add New Product' : 'Edit Product'}</h3>
-              <button
-                type="button"
-                className="admin-modal-close"
-                aria-label="Close form"
+      {/* Product Add Form */}
+      <form className="admin-add-form" onSubmit={handleSubmit} noValidate>
+        <div className="admin-form-columns">
+          {/* Left Column: Image Upload & Status */}
+          <div className="admin-form-col-left">
+            {/* Image Upload Card */}
+            <div className="admin-card-section">
+              <div className="admin-card-header-clean">
+                <h2>Upload Product Image *</h2>
+                <span className="admin-hint-tag">Direct ImageKit CDN</span>
+              </div>
+
+              {/* Hidden File Input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                id="product-image-file"
+                accept="image/png,image/jpeg,image/webp,image/jpg"
+                onChange={handleFileChange}
                 disabled={isSubmitting}
-                onClick={closeModal}
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </header>
+                style={{ display: 'none' }}
+              />
 
-            <form className="admin-product-form" onSubmit={handleSubmit}>
-              <div className="admin-form-grid">
-                <label htmlFor="product-name" className="admin-form-full">
-                  Product Name *
-                  <input
-                    id="product-name"
-                    type="text"
-                    required
-                    value={formState.name}
-                    onChange={(event) => setFormState((prev) => ({ ...prev, name: event.target.value }))}
-                    placeholder="e.g. Kerala Royal Choker"
+              {!imagePreview ? (
+                /* Dropzone State */
+                <div
+                  className={`admin-dropzone ${isDragOver ? 'drag-over' : ''} ${fieldErrors.image ? 'has-error' : ''}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={handleTriggerFileInput}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTriggerFileInput()}
+                  aria-label="Upload Product Image: Drag and drop or click to upload"
+                >
+                  <div className="admin-dropzone-icon">
+                    <i className="fa-solid fa-cloud-arrow-up"></i>
+                  </div>
+                  <div className="admin-dropzone-title">Upload Product Image</div>
+                  <div className="admin-dropzone-subtitle">Drag & drop or click to upload</div>
+                  <div className="admin-dropzone-note">Supports PNG, JPG, or WEBP up to 15MB</div>
+                </div>
+              ) : (
+                /* Selected Preview State */
+                <div className="admin-preview-container">
+                  <div className="admin-preview-image-wrap">
+                    <img src={imagePreview} alt="Selected Product Preview" className="admin-preview-img" />
+                    {isSubmitting && (
+                      <div className="admin-preview-loading-overlay">
+                        <i className="fa-solid fa-circle-notch fa-spin"></i>
+                        <span>Uploading to ImageKit...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="admin-preview-meta">
+                    <div className="admin-preview-info">
+                      <strong className="admin-preview-filename" title={selectedFile?.name}>
+                        {selectedFile?.name}
+                      </strong>
+                      <span className="admin-preview-filesize">
+                        {selectedFile?.size ? (selectedFile.size / 1024).toFixed(1) + ' KB' : ''}
+                      </span>
+                    </div>
+
+                    {!isSubmitting && (
+                      <div className="admin-preview-actions">
+                        <button
+                          type="button"
+                          className="admin-btn-secondary admin-btn-sm"
+                          onClick={handleTriggerFileInput}
+                          title="Select a different image"
+                        >
+                          <i className="fa-solid fa-arrow-rotate-right"></i> Replace
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-btn-danger admin-btn-sm"
+                          onClick={handleRemoveImage}
+                          title="Remove image"
+                        >
+                          <i className="fa-solid fa-trash-can"></i> Remove
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {fieldErrors.image && <p className="admin-field-error-text">{fieldErrors.image}</p>}
+            </div>
+
+            {/* Availability & Status Card */}
+            <div className="admin-card-section">
+              <div className="admin-card-header-clean">
+                <h2>Availability & Status</h2>
+              </div>
+
+              <div className="admin-field-group">
+                <label className="admin-label">Product Visibility</label>
+                <div className="admin-status-toggle-wrap">
+                  <button
+                    type="button"
+                    className={`admin-status-pill ${formState.is_active ? 'active' : ''}`}
+                    onClick={() => handleInputChange('is_active', true)}
                     disabled={isSubmitting}
-                  />
-                  {fieldErrors.name ? <p className="admin-field-error">{fieldErrors.name}</p> : null}
-                </label>
+                  >
+                    <i className="fa-solid fa-check"></i>
+                    <span>Active (Visible on Storefront)</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-status-pill inactive ${!formState.is_active ? 'active' : ''}`}
+                    onClick={() => handleInputChange('is_active', false)}
+                    disabled={isSubmitting}
+                  >
+                    <i className="fa-solid fa-eye-slash"></i>
+                    <span>Draft / Inactive (Hidden)</span>
+                  </button>
+                </div>
+              </div>
 
-                <label htmlFor="product-category">
-                  Category *
+              <div className="admin-field-group" style={{ marginTop: '16px' }}>
+                <label htmlFor="product-stock" className="admin-label">
+                  Stock Units
+                </label>
+                <input
+                  id="product-stock"
+                  type="number"
+                  min="0"
+                  step="1"
+                  className="admin-input"
+                  value={formState.stock}
+                  onChange={(e) => handleInputChange('stock', e.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="10"
+                />
+                {fieldErrors.stock && <p className="admin-field-error-text">{fieldErrors.stock}</p>}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Product Information Fields */}
+          <div className="admin-form-col-right">
+            <div className="admin-card-section">
+              <div className="admin-card-header-clean">
+                <h2>Product Details</h2>
+                <span className="admin-required-hint">* Required fields</span>
+              </div>
+
+              {/* Product Name */}
+              <div className="admin-field-group">
+                <label htmlFor="product-name" className="admin-label">
+                  Product Name *
+                </label>
+                <input
+                  id="product-name"
+                  type="text"
+                  required
+                  className={`admin-input ${fieldErrors.name ? 'input-error' : ''}`}
+                  value={formState.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  placeholder="e.g. Royal Palakka Choker Set"
+                  disabled={isSubmitting}
+                />
+                {fieldErrors.name && <p className="admin-field-error-text">{fieldErrors.name}</p>}
+              </div>
+
+              {/* Category & Collection Row */}
+              <div className="admin-field-row">
+                <div className="admin-field-group">
+                  <label htmlFor="product-category" className="admin-label">
+                    Category *
+                  </label>
                   <select
                     id="product-category"
+                    required
+                    className={`admin-select ${fieldErrors.category ? 'input-error' : ''}`}
                     value={formState.category}
+                    onChange={(e) => handleInputChange('category', e.target.value)}
                     disabled={isSubmitting}
-                    onChange={(event) => setFormState((prev) => ({ ...prev, category: event.target.value }))}
                   >
                     {CATEGORY_OPTIONS.map(([key, label]) => (
                       <option key={key} value={label}>
@@ -523,225 +519,165 @@ const AdminProductsPage = () => {
                       </option>
                     ))}
                   </select>
-                  {fieldErrors.category ? <p className="admin-field-error">{fieldErrors.category}</p> : null}
-                </label>
+                  {fieldErrors.category && <p className="admin-field-error-text">{fieldErrors.category}</p>}
+                </div>
 
-                <label htmlFor="product-bridal-col">
-                  Bridal Collection (Optional)
+                <div className="admin-field-group">
+                  <label htmlFor="product-bridal-col" className="admin-label">
+                    Bridal Collection
+                  </label>
                   <select
                     id="product-bridal-col"
+                    className="admin-select"
                     value={formState.bridal_collection}
+                    onChange={(e) => handleInputChange('bridal_collection', e.target.value)}
                     disabled={isSubmitting}
-                    onChange={(event) => setFormState((prev) => ({ ...prev, bridal_collection: event.target.value }))}
                   >
-                    <option value="">None (Standard Product)</option>
-                    <option value="Kerala Bridal Collection">Kerala Bridal Collection</option>
-                    <option value="Antique Bridal Collection">Antique Bridal Collection</option>
-                    <option value="Trending Bridal Collection">Trending Bridal Collection</option>
-                    <option value="Budget Friendly Collection">Budget Friendly Collection</option>
-                    <option value="Premium Sets Collection">Premium Sets Collection</option>
+                    {BRIDAL_COLLECTION_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
                   </select>
-                </label>
-
-                <label htmlFor="product-price">
-                  Price (₹ INR) *
-                  <input
-                    id="product-price"
-                    type="number"
-                    min="1"
-                    step="1"
-                    required
-                    value={formState.price}
-                    onChange={(event) => setFormState((prev) => ({ ...prev, price: event.target.value }))}
-                    placeholder="e.g. 1499"
-                    disabled={isSubmitting}
-                  />
-                  {fieldErrors.price ? <p className="admin-field-error">{fieldErrors.price}</p> : null}
-                </label>
-
-                <label htmlFor="product-stock">
-                  Stock Units
-                  <input
-                    id="product-stock"
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={formState.stock}
-                    onChange={(event) => setFormState((prev) => ({ ...prev, stock: event.target.value }))}
-                    placeholder="10"
-                    disabled={isSubmitting}
-                  />
-                  {fieldErrors.stock ? <p className="admin-field-error">{fieldErrors.stock}</p> : null}
-                </label>
-
-                <label htmlFor="product-id">
-                  Custom Product ID (Optional)
-                  <input
-                    id="product-id"
-                    type="text"
-                    value={formState.id}
-                    onChange={(event) => setFormState((prev) => ({ ...prev, id: event.target.value }))}
-                    placeholder="Leave empty for auto-generated ID"
-                    disabled={mode === 'edit' || isSubmitting}
-                  />
-                  {fieldErrors.id ? <p className="admin-field-error">{fieldErrors.id}</p> : null}
-                </label>
-
-                <label htmlFor="product-keywords">
-                  Search Keywords
-                  <input
-                    id="product-keywords"
-                    type="text"
-                    value={formState.search_keywords}
-                    onChange={(event) => setFormState((prev) => ({ ...prev, search_keywords: event.target.value }))}
-                    placeholder="e.g. gold choker, bridal, temple"
-                    disabled={isSubmitting}
-                  />
-                </label>
-
-                <label htmlFor="product-desc" className="admin-form-full">
-                  Description
-                  <textarea
-                    id="product-desc"
-                    rows="2"
-                    value={formState.description}
-                    onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
-                    placeholder="Handcrafted piece with exquisite details..."
-                    disabled={isSubmitting}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.8rem',
-                      border: '1px solid #c4cec0',
-                      borderRadius: '4px',
-                      fontFamily: 'inherit',
-                      resize: 'vertical'
-                    }}
-                  />
-                </label>
-
-                {/* Direct ImageKit Upload Section */}
-                <div className="admin-form-full" style={{ marginTop: '5px' }}>
-                  <span style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '6px' }}>
-                    Product Image (Direct ImageKit Upload) *
-                  </span>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '15px',
-                      alignItems: 'center',
-                      padding: '12px',
-                      background: '#f9faf8',
-                      border: '1px dashed #b8c4b4',
-                      borderRadius: '6px'
-                    }}
-                  >
-                    {imagePreview ? (
-                      <div
-                        style={{
-                          width: '70px',
-                          height: '70px',
-                          borderRadius: '4px',
-                          overflow: 'hidden',
-                          border: '1px solid #dcdfd9',
-                          flexShrink: 0
-                        }}
-                      >
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          width: '70px',
-                          height: '70px',
-                          borderRadius: '4px',
-                          background: '#ebeee9',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#849380',
-                          flexShrink: 0
-                        }}
-                      >
-                        <i className="fa-regular fa-image" style={{ fontSize: '1.6rem' }}></i>
-                      </div>
-                    )}
-
-                    <div style={{ flex: 1 }}>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        id="product-image-file"
-                        onChange={handleFileChange}
-                        disabled={isSubmitting}
-                        style={{ display: 'none' }}
-                      />
-                      <label
-                        htmlFor="product-image-file"
-                        className="admin-btn-secondary"
-                        style={{
-                          display: 'inline-block',
-                          cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                          padding: '6px 14px',
-                          fontSize: '0.85rem',
-                          marginBottom: '4px'
-                        }}
-                      >
-                        <i className="fa-solid fa-cloud-arrow-up" style={{ marginRight: '6px' }}></i>
-                        {selectedFile ? 'Change Selected File' : mode === 'edit' ? 'Replace Image' : 'Select Image File'}
-                      </label>
-                      <p style={{ margin: 0, fontSize: '0.75rem', color: '#667761' }}>
-                        {selectedFile
-                          ? `Selected: ${selectedFile.name} (${Math.round(selectedFile.size / 1024)} KB)`
-                          : mode === 'edit'
-                          ? 'Current image preserved from ImageKit. Choose a file to replace it.'
-                          : 'PNG, JPG, WEBP, HEIC up to 15MB. Automatically optimized by ImageKit.'}
-                      </p>
-                    </div>
-                  </div>
-                  {fieldErrors.image ? <p className="admin-field-error">{fieldErrors.image}</p> : null}
                 </div>
               </div>
 
-              {formError ? <p className="admin-form-error">{formError}</p> : null}
+              {/* Pricing Row */}
+              <div className="admin-field-row">
+                <div className="admin-field-group">
+                  <label htmlFor="product-price" className="admin-label">
+                    Price (₹ INR) *
+                  </label>
+                  <div className="admin-input-prefix-wrap">
+                    <span className="admin-input-prefix">₹</span>
+                    <input
+                      id="product-price"
+                      type="number"
+                      min="1"
+                      step="1"
+                      required
+                      className={`admin-input has-prefix ${fieldErrors.price ? 'input-error' : ''}`}
+                      value={formState.price}
+                      onChange={(e) => handleInputChange('price', e.target.value)}
+                      placeholder="2499"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  {fieldErrors.price && <p className="admin-field-error-text">{fieldErrors.price}</p>}
+                </div>
 
-              <footer className="admin-form-actions">
-                <button
-                  type="button"
-                  className="admin-btn-secondary"
-                  onClick={closeModal}
+                <div className="admin-field-group">
+                  <label htmlFor="product-sale-price" className="admin-label">
+                    Sale Price (Optional)
+                  </label>
+                  <div className="admin-input-prefix-wrap">
+                    <span className="admin-input-prefix">₹</span>
+                    <input
+                      id="product-sale-price"
+                      type="number"
+                      min="1"
+                      step="1"
+                      className={`admin-input has-prefix ${fieldErrors.sale_price ? 'input-error' : ''}`}
+                      value={formState.sale_price}
+                      onChange={(e) => handleInputChange('sale_price', e.target.value)}
+                      placeholder="Leave empty if regular price"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  {fieldErrors.sale_price && <p className="admin-field-error-text">{fieldErrors.sale_price}</p>}
+                </div>
+              </div>
+
+              {/* SKU / Product ID */}
+              <div className="admin-field-group">
+                <label htmlFor="product-sku" className="admin-label">
+                  SKU / Product ID <span className="admin-label-optional">(Optional)</span>
+                </label>
+                <input
+                  id="product-sku"
+                  type="text"
+                  className={`admin-input ${fieldErrors.sku ? 'input-error' : ''}`}
+                  value={formState.sku}
+                  onChange={(e) => handleInputChange('sku', e.target.value)}
+                  placeholder="e.g. VYR-CH-108 (Auto-generated if left empty)"
                   disabled={isSubmitting}
-                >
-                  Cancel
-                </button>
+                />
+                <span className="admin-field-help">
+                  Unique identifier used in catalog tracking. Leave blank for auto-generation.
+                </span>
+                {fieldErrors.sku && <p className="admin-field-error-text">{fieldErrors.sku}</p>}
+              </div>
+
+              {/* Description */}
+              <div className="admin-field-group">
+                <label htmlFor="product-description" className="admin-label">
+                  Description
+                </label>
+                <textarea
+                  id="product-description"
+                  rows={4}
+                  className="admin-textarea"
+                  value={formState.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Enter handcrafted craftsmanship notes, motif details, gold plating standards, or bridal styling tips..."
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Search Keywords */}
+              <div className="admin-field-group">
+                <label htmlFor="product-keywords" className="admin-label">
+                  Search Keywords <span className="admin-label-optional">(Optional)</span>
+                </label>
+                <input
+                  id="product-keywords"
+                  type="text"
+                  className="admin-input"
+                  value={formState.search_keywords}
+                  onChange={(e) => handleInputChange('search_keywords', e.target.value)}
+                  placeholder="e.g. kundan, bridal haar, gold choker, south indian wedding"
+                  disabled={isSubmitting}
+                />
+                <span className="admin-field-help">Helps clients discover this jewelry piece in search filters.</span>
+              </div>
+
+              {/* Form Action Bar */}
+              <div className="admin-form-submit-bar">
                 <button
                   type="submit"
-                  className="admin-btn-primary"
-                  disabled={isSubmitting}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  className="admin-submit-btn"
+                  disabled={!isFormValid || isSubmitting}
                 >
                   {isSubmitting ? (
                     <>
                       <i className="fa-solid fa-circle-notch fa-spin"></i>
-                      {selectedFile ? 'Uploading to ImageKit...' : 'Saving to Neon...'}
+                      <span>Uploading to ImageKit & Saving...</span>
                     </>
-                  ) : mode === 'create' ? (
-                    'Create Product'
                   ) : (
-                    'Save Changes'
+                    <>
+                      <i className="fa-solid fa-gem"></i>
+                      <span>Add Product to Collection</span>
+                    </>
                   )}
                 </button>
-              </footer>
-            </form>
-          </section>
+
+                {!isFormValid && !isSubmitting && (
+                  <p className="admin-submit-helper">
+                    {!formState.name.trim()
+                      ? 'Please enter a product name.'
+                      : !formState.price
+                      ? 'Please enter a valid price.'
+                      : !selectedFile
+                      ? 'Please upload a product image to proceed.'
+                      : 'Please complete all required fields.'}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      ) : null}
-    </>
+      </form>
+    </div>
   );
 };
 
